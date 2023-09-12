@@ -1,6 +1,9 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <stdint.h>
+#include <math.h>
+
 typedef   int8_t       i8;
 typedef  int16_t      i16;
 typedef  int32_t      i32;
@@ -9,7 +12,7 @@ typedef  uint8_t       u8;
 typedef uint16_t      u16;
 typedef uint32_t      u32;
 typedef uint64_t      u64;
-typedef float_t       f32;
+typedef  float_t      f32;
 typedef double_t      f64;
 
 #if __x86_64__ || __ppc64__ || _WIN64

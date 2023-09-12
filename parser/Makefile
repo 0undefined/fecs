@@ -1,11 +1,19 @@
-fecs.yy.c: fecs.l
-	flex -o fecs.yy.c fecs.l
+LEX=flex
+YACC=bison
+
+default: main
+fecs.yy.c: fecs.l parser.tab.h
+	flex fecs.l
 
 fecs.yy.o: fecs.yy.c
 	gcc -c fecs.yy.c
 
-parser.tab.c:
-	bison -d parser.y
+parser.tab.o: parser.tab.c
+	gcc -c parser.tab.c
 
-parser.tab.h:
-	bison -d parser.y
+parser.tab.c parser.tab.h: parser.y
+	bison -d -b fecs parser.y
+
+
+main: parser.tab.o fecs.yy.o parser.tab.h
+	gcc -o main -ly -ll main.c parser.tab.o fecs.yy.o
