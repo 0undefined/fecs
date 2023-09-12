@@ -16,11 +16,11 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "ast.h"
-
-void yyerror(char* e);
-int yylex();
-int err = 0;
+//#include "ast.h"
+//
+//void yyerror(char* e);
+//int yylex();
+//int err = 0;
 
 //Spec *specification = NULL;
 
@@ -82,8 +82,8 @@ int err = 0;
 %%
 start: ast {*result = $$ = $1; return 0;}
 
-ast: dexpr { $$ = spec_new(NULL, $1); }
-   | ast dexpr { $$ = spec_push($1, $2); };
+ast: dexpr { Spec* tt = spec_new(); $$ = spec_push(tt, $1); printf("Found dexpr0\n"); }
+   | dexpr ast { $$ = spec_push($2, $1); printf("Found dexpr1\n"); };
 
 dexpr: STRUCT VNAME LCURLY SDef RCURLY
    { $$ = (DExpr){
@@ -91,6 +91,7 @@ dexpr: STRUCT VNAME LCURLY SDef RCURLY
        .name = strdup($2),
        .exp.struct_t = $4,
      };
+     printf("vname:%s\n", $2);
    };
 
 Attribute:
@@ -99,7 +100,8 @@ Attribute:
 
 SDef:
     Attribute SDef { $$ = struct_add_attrib($2, $1); }
-  | { $$ = struct_new(); }
+  | Attribute { $$ = $1; }
+  // | { $$ = struct_new();printf("Got no attrib\n"); }
   ;
 
 %%

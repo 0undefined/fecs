@@ -36,7 +36,7 @@ Spec* spec_push(Spec *s, DExpr e) {
 	if (s->definitions == NULL) {
 		s->definitions = LinkedList_DExpr_new(e);
 	} else {
-		LinkedList_DExpr_append(s->definitions, e);
+		s->definitions = LinkedList_DExpr_append(s->definitions, e);
 	}
 
 	s->num_definitions++;
