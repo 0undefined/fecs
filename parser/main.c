@@ -3,7 +3,7 @@
 
 #define YYSTYPE FECSSTYPE
 #include "fecs.tab.h"
-#include "fecs.lex.h"
+//#include "fecs.lex.h"
 
 LinkedList_Implementation(DExpr);
 

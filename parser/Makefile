@@ -2,18 +2,20 @@ LEX=flex
 YACC=bison
 
 default: main
-fecs.yy.c: fecs.l parser.tab.h
+lex.fecs.c: fecs.l fecs.tab.h
 	flex fecs.l
 
-fecs.yy.o: fecs.yy.c
-	gcc -c fecs.yy.c
+lex.fecs.o: lex.fecs.c
+	gcc -c lex.fecs.c
 
-parser.tab.o: parser.tab.c
-	gcc -c parser.tab.c
+fecs.tab.o: fecs.tab.c
+	gcc -c fecs.tab.c
 
-parser.tab.c parser.tab.h: parser.y
+fecs.tab.c fecs.tab.h: parser.y
 	bison -d -b fecs parser.y
 
+ast.o: ast.c ast.h
+	gcc -c ast.c
 
-main: parser.tab.o fecs.yy.o parser.tab.h
-	gcc -o main -ly -ll main.c parser.tab.o fecs.yy.o
+main: fecs.tab.o lex.fecs.o fecs.tab.h ast.o
+	gcc -o main -ly -ll main.c fecs.tab.o lex.fecs.o ast.o

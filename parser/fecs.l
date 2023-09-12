@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser.tab.h"
+#include "fecs.tab.h"
 
 #define YY_EXIT_FAILURE ((void)yyscanner, EXIT_FAILURE)
 
