@@ -1,8 +1,35 @@
 #include "ast.h"
 
-Attribute* attribute_new(char *vname) {
+const char* Types_str[] = {
+	[Type_internal_error] = "internal_error",
+	[Type_i8] = "i8",
+	[Type_i16] = "i16",
+	[Type_i32] = "i32",
+	[Type_i64] = "i64",
+
+	[Type_u8] = "u8",
+	[Type_u16] = "u16",
+	[Type_u32] = "u32",
+	[Type_u64] = "u64",
+
+	[Type_f32] = "f32",
+	[Type_f64] = "f64",
+
+	[Type_bool] = "bool",
+
+	[Type_usize] = "usize",
+	[Type_isize] = "isize",
+
+	[Type_tuple] = "tuple",
+	[Type_record] = "record",
+
+	[Type_alias] = "alias",
+};
+
+Attribute* attribute_new(Types_t t, char *vname) {
 	Attribute* ret = (Attribute*)calloc(1, sizeof(Attribute));
 	ret->vname = vname;
+	ret->var.type = t;
 	return ret;
 }
 
@@ -11,17 +38,15 @@ Struct_t* struct_new() {
 }
 
 Struct_t* struct_add_attrib(Struct_t* s, Attribute *a) {
-	if (s == NULL) exit(EXIT_FAILURE); //die("Got nil!");
+	if (s == NULL) s = struct_new();
 
 	if (s->attributes == NULL) {
-		s->attributes = (Attribute**)calloc(8, sizeof(Attribute*));
+		s->attributes = LinkedList_Attribute_new(*a);
+	} else {
+		s->attributes = LinkedList_Attribute_append(s->attributes, *a);
 	}
 
-	if (s->num_attributes > 0 && s->num_attributes % 8 == 0) {
-		s->attributes = (Attribute**)realloc(s->attributes, sizeof(Attribute*) * (s->num_attributes + 8));
-	}
-
-	s->attributes[s->num_attributes++] = a;
+	s->num_attributes++;
 	return s;
 }
 
@@ -30,9 +55,8 @@ Spec *spec_new() {
 }
 
 Spec* spec_push(Spec *s, DExpr e) {
-	if (s == NULL) {
-		s = spec_new();
-	}
+	if (s == NULL) s = spec_new();
+
 	if (s->definitions == NULL) {
 		s->definitions = LinkedList_DExpr_new(e);
 	} else {

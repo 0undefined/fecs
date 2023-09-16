@@ -50,16 +50,18 @@
   bool cst;
   DExpr def_expr;
   char* vname;
+  Types_t type;
   Struct_t* struct_t;
   Attribute* attribute_t;
   Spec* specification;
 }
 
 %type <specification> start ast
+%type <type> TYPE
 %type <def_expr> dexpr
 %type <struct_t> SDef
 %type <attribute_t> Attribute
-%type <vname> VNAME TYPENAME
+%type <vname> VNAME
 
 %destructor { free($$); } <vname>
 //%destructor { spec_free($$); } <specification>
@@ -73,35 +75,61 @@
 %token CONCAT
 %token EQUAL PLUS MINUS ASTERISK SLASH DOT
 %left EQUAL
-%left STRUCT COMPONENT TYPE FUNCTION SYSTEM
+%left STRUCTDEF COMPONENTDEF TYPEDEF FUNCTIONDEF SYSTEMDEF
 
-%token VNAME TYPENAME
+%token I8 I16 I32 I64 U8 U16 U32 U64 F32 F64 USIZE ISIZE BOOL TUPLE RECORD
+%token VNAME
 
 %token <cst> TRUE FALSE
 
 %%
 start: ast {*result = $$ = $1; return 0;}
+     ;
 
-ast: dexpr { Spec* tt = spec_new(); $$ = spec_push(tt, $1); printf("Found dexpr0\n"); }
-   | dexpr ast { $$ = spec_push($2, $1); printf("Found dexpr1\n"); };
+ast: ast dexpr { $$ = spec_push($1, $2); }
+   | dexpr { Spec* tt = spec_new(); $$ = spec_push(tt, $1); }
+   ;
 
-dexpr: STRUCT VNAME LCURLY SDef RCURLY
+dexpr: STRUCTDEF VNAME LCURLY SDef RCURLY
    { $$ = (DExpr){
        .type = DExpr_struct,
        .name = strdup($2),
        .exp.struct_t = $4,
      };
-     printf("vname:%s\n", $2);
-   };
+     /*printf("vname:%s\n", $2);*/
+   }
+   ;
 
 Attribute:
-  TYPENAME VNAME { $$ = attribute_new($2); }
+  TYPE VNAME { $$ = attribute_new($1, $2); /*printf("attribute: "); print_attrib($$);*/ }
   ;
 
+TYPE:
+    I8      { $$ = Type_i8;     /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | I16     { $$ = Type_i16;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | I32     { $$ = Type_i32;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | I64     { $$ = Type_i64;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | U8      { $$ = Type_u8;     /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | U16     { $$ = Type_u16;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | U32     { $$ = Type_u32;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | U64     { $$ = Type_u64;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | F32     { $$ = Type_f32;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | F64     { $$ = Type_f64;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | BOOL    { $$ = Type_bool;   /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | USIZE   { $$ = Type_usize;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | ISIZE   { $$ = Type_isize;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | TUPLE   { $$ = Type_tuple;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | RECORD  { $$ = Type_record; /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  | VNAME   { $$ = Type_alias;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
+  ;
+
+
+
+
+
 SDef:
-    Attribute SDef { $$ = struct_add_attrib($2, $1); }
-  | Attribute { $$ = $1; }
-  // | { $$ = struct_new();printf("Got no attrib\n"); }
+    SDef Attribute { $$ = struct_add_attrib($1, $2); }
+  | Attribute { $$ = struct_add_attrib(NULL, $1); }
   ;
 
 %%

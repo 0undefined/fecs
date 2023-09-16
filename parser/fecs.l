@@ -43,11 +43,11 @@ int fecserror(const char *msg);
 
 [ \r\t]     { /* do nothing */ }
 
-"struct"    { return STRUCT; }
-"component" { return COMPONENT; }
-"type"      { return TYPE; }
-"function"  { return FUNCTION; }
-"system"    { return SYSTEM; }
+"struct"    { return STRUCTDEF; }
+"component" { return COMPONENTDEF; }
+"type"      { return TYPEDEF; }
+"function"  { return FUNCTIONDEF; }
+"system"    { return SYSTEMDEF; }
 
 ("/\\"|"&&") { return LAND; }
 ("\\/"|"||") { return LOR; }
@@ -67,8 +67,19 @@ int fecserror(const char *msg);
 "true"          	{ return TRUE; }
 "false"          	{ return FALSE; }
 
-"i32" { yylval->vname = strdup(yytext); return TYPENAME; }
-"i64" { yylval->vname = strdup(yytext); return TYPENAME; }
+"i8"      { return I8;    }
+"i16"     { return I16;   }
+"i32"     { return I32;   }
+"i64"     { return I64;   }
+"u8"      { return U8;    }
+"u16"     { return U16;   }
+"u32"     { return U32;   }
+"u64"     { return U64;   }
+"f32"     { return F32;   }
+"f64"     { return F64;   }
+"usize"   { return USIZE; }
+"isize"   { return ISIZE; }
+"bool"    { return BOOL;  }
 
 [a-zA-Z_][a-zA-Z0-9_']* { yylval->vname = strdup(yytext); return VNAME; }
 

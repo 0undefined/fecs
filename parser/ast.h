@@ -35,6 +35,7 @@ typedef enum DExpr_t {
 
 // Primary types
 typedef enum Types_t {
+	Type_internal_error,
 	Type_i8,
 	Type_i16,
 	Type_i32,
@@ -53,8 +54,13 @@ typedef enum Types_t {
 	Type_usize,
 	Type_isize,
 
+	Type_tuple,
+	Type_record,
+
 	Type_alias,
 } Types_t;
+
+extern const char* Types_str[];
 
 typedef struct Var {
 	Types_t type;
@@ -86,9 +92,11 @@ typedef struct Attribute {
 	Var var;
 } Attribute;
 
+LinkedList(Attribute);
+
 typedef struct Struct_t {
 	isize num_attributes;
-	Attribute** attributes;
+	LinkedList_Attribute* attributes;
 } Struct_t;
 
 typedef struct DExpr {
@@ -109,7 +117,7 @@ typedef struct Spec {
 	//DExpr* definitions;
 } Spec;
 
-Attribute* attribute_new(char *vname);
+Attribute* attribute_new(Types_t t, char *vname);
 
 Struct_t* struct_new();
 Struct_t* struct_add_attrib(Struct_t* s, Attribute *a);

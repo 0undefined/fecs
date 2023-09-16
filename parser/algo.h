@@ -24,20 +24,24 @@ LinkedList_##tt* LinkedList_##tt##_new(tt value) {\
 }\
 LinkedList_##tt* LinkedList_##tt##_append(LinkedList_##tt *ll, tt value) {\
 	if (ll == NULL) {\
-		ll = (LinkedList_##tt*)calloc(1, sizeof(LinkedList_##tt));\
-		ll->prev = NULL;\
-		ll->next = NULL;\
+		ll = LinkedList_##tt##_new(value);\
+		return ll;\
 	}\
 \
-	ll->next = (LinkedList_##tt*)calloc(1, sizeof(LinkedList_##tt));\
-	ll->next->value = value;\
-	ll->next->prev = ll;\
+  LinkedList_##tt* tail = ll;\
+	while (tail->next != NULL) {\
+		tail = tail->next;\
+	}\
+	tail->next = LinkedList_##tt##_new(value);\
+	tail->next->prev = tail;\
 	return ll;\
 }\
 LinkedList_##tt* LinkedList_##tt##_prepend(LinkedList_##tt *ll, tt value) {\
-	if (ll == NULL) return NULL;\
-	ll->prev = (LinkedList_##tt*)calloc(1, sizeof(LinkedList_##tt));\
-	ll->prev->value = value;\
+	if (ll == NULL) {\
+		ll = LinkedList_##tt##_new(value);\
+		return ll;\
+	}\
+	ll->prev = LinkedList_##tt##_new(value);\
 	ll->prev->next = ll;\
 	return ll->prev;\
 }\
