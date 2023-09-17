@@ -1,3 +1,4 @@
+#!./main struct.fecs
 struct v3 {
   i32 x
   i32 y

@@ -18,6 +18,9 @@ void print_ast(Spec* s);
 void print_help();
 
 char* readfile(const char *pathname);
+char* readfile_fd(FILE* file);
+
+int parse_file(Spec** result, FILE* f);
 
 int main (int argc, char* argv[]) {
 
@@ -27,18 +30,15 @@ int main (int argc, char* argv[]) {
 	}
 
 	// For now, just assume the file is the first argument
-	char *mainsource = readfile(argv[1]);
+	FILE* src = fopen(argv[1], "r");
 
-	int i = 0;
 	Spec* result = NULL;
-	yyscan_t scanner;
-
-	if ((i = fecslex_init(&scanner)) != 0)
-		exit(i);
 
 	clock_t start = clock(), diff;
 
-	int e = fecsparse(&result, scanner);
+	int e = parse_file(&result, src);
+
+	//int e = fecsparse(&result, scanner);
 	printf("Code = %d\n", e);
 	if (e == 0) {
 		printf("\n---\n");
@@ -51,9 +51,9 @@ int main (int argc, char* argv[]) {
 	int diff_ms = diff * 1000 / CLOCKS_PER_SEC;
 	printf("Parsing took %ds %dms!\n", diff_ms / 1000, diff_ms % 1000);
 
-	fecslex_destroy(scanner);
+	//fecslex_destroy(scanner);
 
-	free(mainsource);
+	//free(mainsource);
 	return 0;
 }
 
@@ -79,7 +79,10 @@ void die_imp(const char *fmt, const char *file, int line, ...) {
 }
 
 char* readfile(const char *pathname) {
-	FILE* file = fopen(pathname, "r");
+	return readfile_fd(fopen(pathname, "r"));
+}
+
+char* readfile_fd(FILE* file) {
 	usize len = 0;
 	char* buf = NULL;
 
@@ -100,8 +103,36 @@ char* readfile(const char *pathname) {
 	return buf;
 }
 
+int parse_file(Spec** result, FILE* f) {
+	yyscan_t scanner;
+	int i = 0;
+
+	if (!f) {
+		die("Failed to read file");
+	}
+
+	fseek(f, 0, SEEK_END);
+	usize len = ftell(f);
+	rewind(f);
+
+	if ((i = fecslex_init(&scanner)) != 0)
+		exit(i);
+
+	char *src = readfile_fd(f);
+	set_input_string(src, scanner);
+
+	YY_BUFFER_STATE s = fecs_scan_string ( src, scanner );
+
+	i = fecsparse(result, scanner);
+
+  end_lexical_scan(s, scanner);
+	//fecs_delete_buffer(s, scanner);
+	fecslex_destroy(scanner);
+	return i;
+}
+
 void print_ast(Spec* s) {
-	if (s == NULL) {printf("<empty ast>"); return;}
+	if (s == NULL) {printf("<empty ast>\n"); return;}
 	//printf("Num constructs: %lu\n", s->num_definitions);
 	LinkedList_DExpr *head = s->definitions;
 

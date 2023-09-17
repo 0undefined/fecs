@@ -28,6 +28,9 @@
 #define YYSTYPE FECSSTYPE
 
 int fecserror(const char *msg);
+void set_input_string(const char* in, yyscan_t scanner);
+void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
+
 %}
 
 %%
@@ -54,6 +57,10 @@ int fecserror(const char *msg);
 ("!"|"¬")    { return LNEG; }
 
 "++"         { return CONCAT; }
+
+"#!"         { return SHEBANG; }
+"#include"   { return PRAGMA_IMPORT; /* #include C-library */ }
+"#load"      { return PRAGMA_LOAD; /* Load other fecs source */ }
 
 ":"          { return COLON; }
 "="          { return EQUAL; }
