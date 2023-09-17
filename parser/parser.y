@@ -43,7 +43,7 @@
 
 %code {
  int fecserror(void *foo, char const *msg, const void *s);
- int fecslex(void *lval, const void *s);
+ int fecslex(FECSSTYPE *lval , void *s);
 }
 
 %union {

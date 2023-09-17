@@ -53,34 +53,46 @@ int fecserror(const char *msg);
 ("\\/"|"||") { return LOR; }
 ("!"|"¬")    { return LNEG; }
 
-"++"          	{ return CONCAT; }
+"++"         { return CONCAT; }
 
-":"           	{ return COLON; }
-"="           	{ return EQUAL; }
+":"          { return COLON; }
+"="          { return EQUAL; }
 
-"+"           	{ return PLUS; }
-"-"           	{ return MINUS; }
-"*"           	{ return ASTERISK; }
-"/"           	{ return SLASH; }
-"."           	{ return DOT; }
+"+"          { return PLUS; }
+"-"          { return MINUS; }
+"*"          { return ASTERISK; }
+"/"          { return SLASH; }
+"."          { return DOT; }
 
-"true"          	{ return TRUE; }
-"false"          	{ return FALSE; }
+"true"       { return TRUE; }
+"false"      { return FALSE; }
 
-"i8"      { return I8;    }
-"i16"     { return I16;   }
-"i32"     { return I32;   }
-"i64"     { return I64;   }
-"u8"      { return U8;    }
-"u16"     { return U16;   }
-"u32"     { return U32;   }
-"u64"     { return U64;   }
-"f32"     { return F32;   }
-"f64"     { return F64;   }
-"usize"   { return USIZE; }
-"isize"   { return ISIZE; }
-"bool"    { return BOOL;  }
+"i8"         { return I8;    }
+"i16"        { return I16;   }
+"i32"        { return I32;   }
+"i64"        { return I64;   }
+"u8"         { return U8;    }
+"u16"        { return U16;   }
+"u32"        { return U32;   }
+"u64"        { return U64;   }
+"f32"        { return F32;   }
+"f64"        { return F64;   }
+"usize"      { return USIZE; }
+"isize"      { return ISIZE; }
+"bool"       { return BOOL;  }
 
 [a-zA-Z_][a-zA-Z0-9_']* { yylval->vname = strdup(yytext); return VNAME; }
 
 [\n]+         { /* Ignored */ }
+
+%%
+
+void
+set_input_string(const char* in, yyscan_t scanner) {
+  yy_scan_string(in, scanner);
+}
+
+void
+end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner) {
+  yy_delete_buffer(b, scanner);
+}
