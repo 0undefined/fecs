@@ -1,0 +1,16 @@
+struct v3 {
+  i32 x
+  i32 y
+  i32 z
+}
+
+struct aa {
+  i8 x
+  bool v2
+  f32 z
+}
+
+struct aliasedTypes {
+  v3 vecA
+  someType vecB
+}
