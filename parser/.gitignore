@@ -1,0 +1,6 @@
+*.o
+fecs.tab.c
+fecs.tab.h
+lex.fecs.c
+lex.fecs.h
+main
