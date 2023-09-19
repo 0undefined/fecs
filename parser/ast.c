@@ -5,29 +5,32 @@ LinkedList_Implementation(Declaration);
 
 const char* Types_str[] = {
 	[Type_internal_error] = "internal_error",
-	[Type_untyped] = "untyped",
-	[Type_i8] = "i8",
-	[Type_i16] = "i16",
-	[Type_i32] = "i32",
-	[Type_i64] = "i64",
+	[Type_untyped]        = "untyped",
 
-	[Type_u8] = "u8",
-	[Type_u16] = "u16",
-	[Type_u32] = "u32",
-	[Type_u64] = "u64",
+	[Type_i8]     = "i8",
+	[Type_i16]    = "i16",
+	[Type_i32]    = "i32",
+	[Type_i64]    = "i64",
 
-	[Type_f32] = "f32",
-	[Type_f64] = "f64",
+	[Type_u8]     = "u8",
+	[Type_u16]    = "u16",
+	[Type_u32]    = "u32",
+	[Type_u64]    = "u64",
 
-	[Type_bool] = "bool",
+	[Type_f32]    = "f32",
+	[Type_f64]    = "f64",
 
-	[Type_usize] = "usize",
-	[Type_isize] = "isize",
+	[Type_bool]   = "bool",
 
-	[Type_tuple] = "tuple",
+	[Type_usize]  = "usize",
+	[Type_isize]  = "isize",
+
+	[Type_tuple]  = "tuple",
 	[Type_record] = "record",
+	[Type_sum]    = "sum",
+	[Type_array]  = "array",
 
-	[Type_alias] = "alias",
+	[Type_alias]  = "alias",
 };
 
 Declaration* declaration_new(Types_t t, char *vname) {

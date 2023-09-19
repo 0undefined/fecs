@@ -13,7 +13,6 @@
 %option   yylineno
 %option   outfile="lex.fecs.c" header-file="lex.fecs.h"
 
-
 %{
 #include "fecs.tab.h"
 

@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define YYSTYPE FECSSTYPE
+#include "parser_api.h"
 #include "util.h"
+#include "ast_print.h"
 
 //int tokenize_callback(char *, void (*)(const char *));
 

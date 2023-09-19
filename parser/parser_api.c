@@ -1,9 +1,14 @@
-//#include "ast.h"
+#include "parser_api.h"
 
 #include "fecs.tab.h"
 #include "lex.fecs.h"
 #include "ast.h"
 #include "ast_print.h"
+#include "util.h"
+
+/* Defined in fecs.l */
+void set_input_string(const char* in, yyscan_t scanner);
+void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 
 int parse_file(Spec** result, FILE* f) {
 	yyscan_t scanner;

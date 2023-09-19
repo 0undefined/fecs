@@ -41,8 +41,11 @@ typedef enum Types_t {
 	Type_usize,
 	Type_isize,
 
-	Type_tuple,
-	Type_record,
+	// Determine how these look implementation wise
+	Type_tuple,  // ( a, b, c )
+	Type_record, // { k0 : a, k1 : b, k2 : c} }
+	Type_sum,    //  a | b | c
+	Type_array,  // [n]a
 
 	Type_alias,
 } Types_t;
@@ -67,7 +70,6 @@ typedef struct Var {
 
 		struct { isize v;}  isize_t;
 		struct { usize v;}  usize_t;
-
 
 		struct { Types_t v;} alias_t;
 	} value;
