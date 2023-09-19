@@ -1,17 +1,17 @@
-#!./main struct.fecs
+#!main
 struct v3 {
-  i32 x
-  i32 y
-  i32 z
+  x : i32
+  y
+  z : i32
 }
 
 struct aa {
-  i8 x
-  bool v2
-  f32 z
+  x  : i8
+  v2 : bool
+  z  : f32
 }
 
 struct aliasedTypes {
-  v3 vecA
-  someType vecB
+  vecA : v3
+  vecB : someType
 }

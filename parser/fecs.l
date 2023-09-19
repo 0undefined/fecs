@@ -35,6 +35,10 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 
 %%
 
+"#!".*"\n"   { return SHEBANG; }
+"#include"   { return PRAGMA_IMPORT; /* #include C-library */ }
+"#load"      { return PRAGMA_LOAD; /* Load other fecs source */ }
+
 "("         { return LPAR; }
 ")"         { return RPAR; }
 "{"         { return LCURLY; }
@@ -42,7 +46,7 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 "["         { return LBRACK; }
 "]"         { return RBRACK; }
 
-"//".*         { }
+"//".*      { /* comment */ }
 
 [ \r\t]     { /* do nothing */ }
 
@@ -57,10 +61,6 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 ("!"|"¬")    { return LNEG; }
 
 "++"         { return CONCAT; }
-
-"#!"         { return SHEBANG; }
-"#include"   { return PRAGMA_IMPORT; /* #include C-library */ }
-"#load"      { return PRAGMA_LOAD; /* Load other fecs source */ }
 
 ":"          { return COLON; }
 "="          { return EQUAL; }
@@ -87,6 +87,7 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 "usize"      { return USIZE; }
 "isize"      { return ISIZE; }
 "bool"       { return BOOL;  }
+"string"     { return STRING;  }
 
 [a-zA-Z_][a-zA-Z0-9_']* { yylval->vname = strdup(yytext); return VNAME; }
 

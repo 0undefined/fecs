@@ -52,7 +52,7 @@
   char* vname;
   Types_t type;
   Struct_t* struct_t;
-  Attribute* attribute_t;
+  Declaration* declaration_t;
   Spec* specification;
 }
 
@@ -60,7 +60,7 @@
 %type <type> TYPE
 %type <def_expr> dexpr
 %type <struct_t> SDef
-%type <attribute_t> Attribute
+%type <declaration_t> Decl
 %type <vname> VNAME
 
 %destructor { free($$); } <vname>
@@ -80,13 +80,14 @@
 %left EQUAL
 %left STRUCTDEF COMPONENTDEF TYPEDEF FUNCTIONDEF SYSTEMDEF
 
-%token I8 I16 I32 I64 U8 U16 U32 U64 F32 F64 USIZE ISIZE BOOL TUPLE RECORD
+%token I8 I16 I32 I64 U8 U16 U32 U64 F32 F64 USIZE ISIZE BOOL TUPLE RECORD STRING
 %token VNAME
 
 %token <cst> TRUE FALSE
 
 %%
-start: ast {*result = $$ = $1; return 0;}
+start: SHEBANG ast {*result = $$ = $2; return 0;}
+     | ast {*result = $$ = $1; return 0;}
      ;
 
 ast: ast dexpr { $$ = spec_push($1, $2); }
@@ -103,8 +104,11 @@ dexpr: STRUCTDEF VNAME LCURLY SDef RCURLY
    }
    ;
 
-Attribute:
-  TYPE VNAME { $$ = attribute_new($1, $2); /*printf("attribute: "); print_attrib($$);*/ }
+Decl:
+    VNAME { $$ = declaration_new(Type_untyped, $1); }
+  | VNAME COLON TYPE { $$ = declaration_new($3, $1); }
+  // | VNAME EQUAL Expression { $$ = attribute_new($3, $1); }
+  // | VNAME COLON TYPE EQUAL Expression { $$ = attribute_new($3, $1); }
   ;
 
 TYPE:
@@ -131,8 +135,8 @@ TYPE:
 
 
 SDef:
-    SDef Attribute { $$ = struct_add_attrib($1, $2); }
-  | Attribute { $$ = struct_add_attrib(NULL, $1); }
+    SDef Decl { $$ = struct_add_attrib($1, $2); }
+  | Decl { $$ = struct_add_attrib(NULL, $1); }
   ;
 
 %%

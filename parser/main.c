@@ -8,12 +8,12 @@
 #include "ast.h"
 
 LinkedList_Implementation(DExpr);
-LinkedList_Implementation(Attribute);
+LinkedList_Implementation(Declaration);
 
 //int tokenize_callback(char *, void (*)(const char *));
 
 void print_word(const char* w);
-void print_attrib(Attribute* a);
+void print_attrib(Declaration* a);
 void print_ast(Spec* s);
 void print_help();
 
@@ -137,8 +137,8 @@ void print_ast(Spec* s) {
 	LinkedList_DExpr *head = s->definitions;
 
 	while (head != NULL) {
-		printf("def %s [%lu]{\n", head->value.name, head->value.exp.struct_t->num_attributes);
-		LinkedList_Attribute* head1 = head->value.exp.struct_t->attributes;
+		printf("def %s [%lu]{\n", head->value.name, head->value.exp.struct_t->num_declarations);
+		LinkedList_Declaration* head1 = head->value.exp.struct_t->declarations;
 
 		while (head1 != NULL) {
 			printf("  ");
@@ -157,7 +157,7 @@ void print_word(const char* w) {
 	puts(w);
 }
 
-void print_attrib(Attribute* a) {
+void print_attrib(Declaration* a) {
 	Types_t t = a->var.type;
 	printf("%s :: %s\n", a->vname, Types_str[t]);
 }

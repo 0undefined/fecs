@@ -2,6 +2,7 @@
 
 const char* Types_str[] = {
 	[Type_internal_error] = "internal_error",
+	[Type_untyped] = "untyped",
 	[Type_i8] = "i8",
 	[Type_i16] = "i16",
 	[Type_i32] = "i32",
@@ -26,8 +27,8 @@ const char* Types_str[] = {
 	[Type_alias] = "alias",
 };
 
-Attribute* attribute_new(Types_t t, char *vname) {
-	Attribute* ret = (Attribute*)calloc(1, sizeof(Attribute));
+Declaration* declaration_new(Types_t t, char *vname) {
+	Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
 	ret->vname = vname;
 	ret->var.type = t;
 	return ret;
@@ -37,16 +38,16 @@ Struct_t* struct_new() {
 	return (Struct_t*)calloc(1, sizeof(Struct_t));
 }
 
-Struct_t* struct_add_attrib(Struct_t* s, Attribute *a) {
+Struct_t* struct_add_attrib(Struct_t* s, Declaration *a) {
 	if (s == NULL) s = struct_new();
 
-	if (s->attributes == NULL) {
-		s->attributes = LinkedList_Attribute_new(*a);
+	if (s->declarations == NULL) {
+		s->declarations = LinkedList_Declaration_new(*a);
 	} else {
-		s->attributes = LinkedList_Attribute_append(s->attributes, *a);
+		s->declarations = LinkedList_Declaration_append(s->declarations, *a);
 	}
 
-	s->num_attributes++;
+	s->num_declarations++;
 	return s;
 }
 
