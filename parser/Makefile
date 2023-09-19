@@ -18,5 +18,11 @@ fecs.tab.o: fecs.tab.c fecs.tab.h
 ast.o: ast.c ast.h
 	gcc -g -Og -c ast.c
 
+ast_print.o: ast_print.c ast_print.h ast.c ast.h
+	gcc -g -Og -c ast_print.c
+
+util.o: util.c util.h
+	gcc -g -Og -c util.c
+
 main: main.c fecs.tab.o lex.fecs.o fecs.tab.h ast.o
 	cc -g -Og -o main main.c fecs.tab.o lex.fecs.o ast.o

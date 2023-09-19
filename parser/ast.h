@@ -5,14 +5,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <stdio.h>
 
 #include "types.h"
 #include "algo.h"
-
-#define die(fmt, ...) die_imp(fmt, __FILE__, __LINE__ __VA_ARGS__)
-void die_imp(const char *fmt, const char *file, int line, ...);
 
 // Top level definitions
 typedef enum DExpr_t {
