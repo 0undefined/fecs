@@ -3,9 +3,9 @@
 
 #define LinkedList(tt) \
 typedef struct LinkedList_##tt {\
-	tt value;\
-	struct LinkedList_##tt *next;\
-	struct LinkedList_##tt *prev;\
+  tt value;\
+  struct LinkedList_##tt *next;\
+  struct LinkedList_##tt *prev;\
 } LinkedList_##tt;\
 \
 LinkedList_##tt* LinkedList_##tt##_new(tt value);\
@@ -16,53 +16,53 @@ LinkedList_##tt* LinkedList_##tt##_reverse(LinkedList_##tt *ll, tt value);
 
 #define LinkedList_Implementation(tt) \
 LinkedList_##tt* LinkedList_##tt##_new(tt value) {\
-	LinkedList_##tt* ll = (LinkedList_##tt*)calloc(1, sizeof(LinkedList_##tt));\
-	ll->prev = NULL;\
-	ll->next = NULL;\
-	ll->value = value;\
-	return ll;\
+  LinkedList_##tt* ll = (LinkedList_##tt*)calloc(1, sizeof(LinkedList_##tt));\
+  ll->prev = NULL;\
+  ll->next = NULL;\
+  ll->value = value;\
+  return ll;\
 }\
 LinkedList_##tt* LinkedList_##tt##_append(LinkedList_##tt *ll, tt value) {\
-	if (ll == NULL) {\
-		ll = LinkedList_##tt##_new(value);\
-		return ll;\
-	}\
+  if (ll == NULL) {\
+    ll = LinkedList_##tt##_new(value);\
+    return ll;\
+  }\
 \
   LinkedList_##tt* tail = ll;\
-	while (tail->next != NULL) {\
-		tail = tail->next;\
-	}\
-	tail->next = LinkedList_##tt##_new(value);\
-	tail->next->prev = tail;\
-	return ll;\
+  while (tail->next != NULL) {\
+    tail = tail->next;\
+  }\
+  tail->next = LinkedList_##tt##_new(value);\
+  tail->next->prev = tail;\
+  return ll;\
 }\
 LinkedList_##tt* LinkedList_##tt##_prepend(LinkedList_##tt *ll, tt value) {\
-	if (ll == NULL) {\
-		ll = LinkedList_##tt##_new(value);\
-		return ll;\
-	}\
-	ll->prev = LinkedList_##tt##_new(value);\
-	ll->prev->next = ll;\
-	return ll->prev;\
+  if (ll == NULL) {\
+    ll = LinkedList_##tt##_new(value);\
+    return ll;\
+  }\
+  ll->prev = LinkedList_##tt##_new(value);\
+  ll->prev->next = ll;\
+  return ll->prev;\
 }\
 void LinkedList_##tt##_free(LinkedList_##tt *ll, tt value) {\
-	LinkedList_##tt *n = ll;\
-	while (n != NULL) {\
-		LinkedList_##tt *m = n;\
-		n = n->next;\
-		free(m);\
-	}\
+  LinkedList_##tt *n = ll;\
+  while (n != NULL) {\
+    LinkedList_##tt *m = n;\
+    n = n->next;\
+    free(m);\
+  }\
 }\
 LinkedList_##tt* LinkedList_##tt##_reverse(LinkedList_##tt *ll, tt value) {\
-	LinkedList_##tt *head = ll;\
-	if (head == NULL) return NULL;\
-	while (head->next != NULL) {\
-		LinkedList_##tt *t = head;\
-		head = head->next;\
-		t->prev = head;\
-		head->next = t;\
-	}\
-	return head;\
+  LinkedList_##tt *head = ll;\
+  if (head == NULL) return NULL;\
+  while (head->next != NULL) {\
+    LinkedList_##tt *t = head;\
+    head = head->next;\
+    t->prev = head;\
+    head->next = t;\
+  }\
+  return head;\
 }
 
 #endif

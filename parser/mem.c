@@ -53,8 +53,8 @@ void memory_free(memory *mem, usize size) {
 }
 
 void memory_clear(memory *mem) {
-	mem->pos  = 0;
-	mem->free = mem->size;
-	/* Reset the memory? */
-	memset(mem->data, 0, mem->size);
+  mem->pos  = 0;
+  mem->free = mem->size;
+  /* Reset the memory? */
+  memset(mem->data, 0, mem->size);
 }
