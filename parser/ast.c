@@ -1,5 +1,8 @@
 #include "ast.h"
 
+LinkedList_Implementation(DExpr);
+LinkedList_Implementation(Declaration);
+
 const char* Types_str[] = {
 	[Type_internal_error] = "internal_error",
 	[Type_untyped] = "untyped",
