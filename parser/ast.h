@@ -12,17 +12,35 @@
 
 // Top level definitions
 typedef enum DExpr_t {
+  /* Structs are program-level type definitions used to group related values
+   * together. */
   DExpr_struct,
+  /* A component, like a struct, groups values together, but has some
+   * restrictions imposed upon them. They are used for the produced ECS. */
   DExpr_Component,
+  /* A type is a composition of components, used to efficiently create entities
+   * with several components */
   DExpr_Type,
+  /* Program-level function. */
   DExpr_Function,
+  /* Like functions, but can only be used in the resulting ECS. They also has
+   * some restrictions, such as their first argument, and return-value, must
+   * both be of the same type/component. */
   DExpr_System,
+  /* An entrypoint is a program entry-point. If no entrypoint is specified, it
+   * is assumed that the compilation should result in a library. If function
+   * `main` exists, and no entry-point is specified, it is assumed that main is
+   * the entrypoint. */
+  DExpr_Entry,
 } DExpr_t;
+
+extern const char* Types_str[];
 
 // Primary types
 typedef enum Types_t {
   Type_internal_error,
   Type_untyped,
+
   Type_i8,
   Type_i16,
   Type_i32,
@@ -41,20 +59,27 @@ typedef enum Types_t {
   Type_usize,
   Type_isize,
 
-  // Determine how these look implementation wise
-  Type_tuple,  // ( a, b, c )
-  Type_record, // { k0 : a, k1 : b, k2 : c} }
-  Type_sum,    //  a | b | c
-  Type_array,  // [n]a
+  Type_string,
 
-  Type_alias,
+  /* Combinatory types, and their syntax. */
+  Type_tuple,    // ( a, b, c )
+  Type_struct,   // { k0; k1 : a; k2 = v0; k3 : b = v1; }
+  Type_union,    //  a | b | c
+  Type_array,    // [n]a
+  Type_list,     // list a
+
+  /* Pointer types */
+  Type_pointer,  // *a
+  Type_owner,    // &a
+
+  Type_function, // a -> b
+
+  Type_alias,    // typedef TYPE VNAME;
 } Types_t;
 
-extern const char* Types_str[];
-
-typedef struct Var {
+typedef struct Value {
   Types_t type;
-  char *typestr;
+
 
   union {
     struct {   i8 v;}   i8_t;
@@ -71,17 +96,34 @@ typedef struct Var {
     struct { isize v;}  isize_t;
     struct { usize v;}  usize_t;
 
-    struct { Types_t v;} alias_t;
+    struct { char *typestr; Types_t v; } alias_t;
   } value;
-} Var;
+} Value;
 
+typedef enum Maybe {
+  None,
+  Some,
+} Maybe;
+
+typedef struct VName {
+  isize tag;
+  char* name;
+} VName;
+
+/* Declarations are of the form `VARIABLENAME [":" TYPE] ["=" VALUE];`.
+ * If no type is given, the most restrictive type that can be assumed from the
+ * value is taken.
+ * If no value is given, the zero-element of the type is assumed.
+ * If neither is given, we pray that we can assume some value later by observing
+ * the usage of VARIABLENAME. */
 typedef struct Declaration {
-  char* vname;
-  bool has_default_value;
-  Var var;
+  VName vname;
+  Maybe has_type;
+  Maybe has_default_value;
+  Value value;
 } Declaration;
 
-LinkedList(Declaration);
+LinkedList(Declaration)
 
 typedef struct Struct_t {
   isize num_declarations;
@@ -98,7 +140,7 @@ typedef struct DExpr {
 } DExpr;
 
 
-LinkedList(DExpr);
+LinkedList(DExpr)
 
 typedef struct Spec {
   isize num_definitions;
@@ -106,7 +148,10 @@ typedef struct Spec {
   //DExpr* definitions;
 } Spec;
 
-Declaration* declaration_new(Types_t t, char *vname);
+Declaration* declaration_new_open(char *vname);
+Declaration* declaration_new_typed(char *vname, Types_t t);
+Declaration* declaration_new_untyped(char *vname, Value v);
+Declaration* declaration_new(char *vname, Types_t t, Value v);
 
 Struct_t* struct_new();
 Struct_t* struct_add_attrib(Struct_t* s, Declaration *a);

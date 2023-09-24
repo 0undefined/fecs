@@ -34,20 +34,22 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 
 %%
 
-"#!".*"\n"   { return SHEBANG; }
-"#include"   { return PRAGMA_IMPORT; /* #include C-library */ }
-"#load"      { return PRAGMA_LOAD; /* Load other fecs source */ }
+"#!".*"\n"  { return SHEBANG; }
+"#include"  { return PRAGMA_IMPORT; /* #include C-library */ }
+"#load"     { return PRAGMA_LOAD; /* Load other fecs source */ }
+
+"->"        { return ARROW; }
 
 "("         { return LPAR; }
 ")"         { return RPAR; }
-"{"         { return LCURLY; }
-"}"         { return RCURLY; }
-"["         { return LBRACK; }
-"]"         { return RBRACK; }
+"{"         { return LBRACE; }
+"}"         { return RBRACE; }
+"["         { return LBRACKET; }
+"]"         { return RBRACKET; }
+"<"         { return LT; }
+">"         { return GT; }
 
-"//".*      { /* comment */ }
-
-[ \r\t]     { /* do nothing */ }
+"//".*\n      { /* comment */ }
 
 "struct"    { return STRUCTDEF; }
 "component" { return COMPONENTDEF; }
@@ -57,11 +59,12 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 
 ("/\\"|"&&") { return LAND; }
 ("\\/"|"||") { return LOR; }
-("!"|"¬")    { return LNEG; }
+("!"|"¬")    { return NEG; }
 
 "++"         { return CONCAT; }
 
 ":"          { return COLON; }
+":"          { return SEMICOLON; }
 "="          { return EQUAL; }
 
 "+"          { return PLUS; }
@@ -83,14 +86,15 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 "u64"        { return U64;   }
 "f32"        { return F32;   }
 "f64"        { return F64;   }
+"bool"       { return BOOL;  }
 "usize"      { return USIZE; }
 "isize"      { return ISIZE; }
-"bool"       { return BOOL;  }
 "string"     { return STRING;  }
+"list"       { return LIST;  }
 
 [a-zA-Z_][a-zA-Z0-9_']* { yylval->vname = strdup(yytext); return VNAME; }
 
-[\n]+         { /* Ignored */ }
+[ \r\t\n]+     { /* do nothing */ }
 
 %%
 

@@ -1,5 +1,7 @@
 #include "ast.h"
 
+static isize GLOBAL_tag_counter = 0;
+
 LinkedList_Implementation(DExpr);
 LinkedList_Implementation(Declaration);
 
@@ -7,36 +9,84 @@ const char* Types_str[] = {
   [Type_internal_error] = "internal_error",
   [Type_untyped]        = "untyped",
 
-  [Type_i8]     = "i8",
-  [Type_i16]    = "i16",
-  [Type_i32]    = "i32",
-  [Type_i64]    = "i64",
+  [Type_i8]       = "i8",
+  [Type_i16]      = "i16",
+  [Type_i32]      = "i32",
+  [Type_i64]      = "i64",
 
-  [Type_u8]     = "u8",
-  [Type_u16]    = "u16",
-  [Type_u32]    = "u32",
-  [Type_u64]    = "u64",
+  [Type_u8]       = "u8",
+  [Type_u16]      = "u16",
+  [Type_u32]      = "u32",
+  [Type_u64]      = "u64",
 
-  [Type_f32]    = "f32",
-  [Type_f64]    = "f64",
+  [Type_f32]      = "f32",
+  [Type_f64]      = "f64",
 
-  [Type_bool]   = "bool",
+  [Type_bool]     = "bool",
 
-  [Type_usize]  = "usize",
-  [Type_isize]  = "isize",
+  [Type_usize]    = "usize",
+  [Type_isize]    = "isize",
 
-  [Type_tuple]  = "tuple",
-  [Type_record] = "record",
-  [Type_sum]    = "sum",
-  [Type_array]  = "array",
+  [Type_string]    = "string",
+
+  /* Combinatory types, and their syntax. */
+  [Type_tuple]    = "tuple",
+  [Type_struct]   = "record",
+  [Type_union]    = "union",
+  [Type_array]    = "array",
+  [Type_list]     = "list",
+
+  /* Pointer types */
+  [Type_pointer]  = "pointer",
+  [Type_owner]    = "owner",
+
+  [Type_function] = "function",
 
   [Type_alias]  = "alias",
 };
 
-Declaration* declaration_new(Types_t t, char *vname) {
+/* For the declaration constructors, assume that `vname` already has allocated
+ * dedicated memory */
+
+/* Create a untyped, no-value declaration. */
+Declaration* declaration_new_open(char *vname) {
   Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
-  ret->vname = vname;
-  ret->var.type = t;
+  ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
+  ret->has_type = None;
+  ret->has_default_value = None;
+  ret->value.type = Type_untyped;
+  return ret;
+}
+
+/* Create a typed, no-value declaration, assume default zero-element. */
+Declaration* declaration_new_typed(char *vname, Types_t t) {
+  Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
+  ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
+  ret->has_type = Some;
+  ret->has_default_value = None;
+  ret->value.type = t;
+  // TODO: Create function to return, or lookup default values.
+  //ret->value.value = (Value){0};
+  return ret;
+}
+
+/* Create a untyped declaration. The type is inferred from the default value. */
+Declaration* declaration_new_untyped(char *vname, Value v) {
+  Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
+  ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
+  ret->has_type = None;
+  ret->has_default_value = Some;
+  // TODO: Mayhaps create the lexer such that it parses specific values and
+  // attaches a assumed type pairs? Then we can "lift" the type if necessary.
+  ret->value = v;
+  return ret;
+}
+
+/* The way god intended declarations to be defined */
+Declaration* declaration_new(char *vname, Types_t t, Value v) {
+  Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
+  ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
+  ret->value.type = t;
   return ret;
 }
 

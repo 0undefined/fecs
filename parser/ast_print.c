@@ -27,7 +27,12 @@ void print_word(const char* w) {
   puts(w);
 }
 
+void print_vname(VName n) {
+  printf("%s_%zd", n.name, n.tag);
+}
+
 void print_attrib(Declaration* a) {
-  Types_t t = a->var.type;
-  printf("%s :: %s\n", a->vname, Types_str[t]);
+  Types_t t = a->value.type;
+  print_vname(a->vname);
+  printf(" : %s\n", Types_str[t]);
 }

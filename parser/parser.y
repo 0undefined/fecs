@@ -51,6 +51,7 @@
   DExpr def_expr;
   char* vname;
   Types_t type;
+  Value value;
   Struct_t* struct_t;
   Declaration* declaration_t;
   Spec* specification;
@@ -68,69 +69,93 @@
 
 
 
-%token SHEBANG PRAGMA_IMPORT PRAGMA_LOAD
+%token VNAME
 
-%token LPAR RPAR LCURLY RCURLY LBRACK RBRACK COLON
-
-%token LAND LOR LNEG
+%token LAND LOR NEG
 
 %token CONCAT
 %left PLUS MINUS
-%left ASTERISK SLASH DOT
-%left EQUAL
+%left SLASH DOT
 %left STRUCTDEF COMPONENTDEF TYPEDEF FUNCTIONDEF SYSTEMDEF
 
-%token I8 I16 I32 I64 U8 U16 U32 U64 F32 F64 USIZE ISIZE BOOL TUPLE RECORD STRING
-%token VNAME
+%token <value> NUMBER
 
+// Typenames
+%token I8    I16    I32    I64    U8    U16    U32    U64    F32    F64    BOOL    USIZE    ISIZE    STRING    LIST
+// Typevalues
+%token <value>
+       I8VAL I16VAL I32VAL I64VAL U8VAL U16VAL U32VAL U64VAL F32VAL F64VAL BOOLVAL USIZEVAL ISIZEVAL STRINGVAL LISTVAL
+
+%left ARROW ASTERISK AMPERSAND BAR SEMICOLON COLON EQUAL COMMA
+
+%token LPAR RPAR LBRACE RBRACE LBRACKET RBRACKET LT GT
 %token <cst> TRUE FALSE
 
+%token SHEBANG PRAGMA_IMPORT PRAGMA_LOAD
+
 %%
-start: SHEBANG ast {*result = $$ = $2; return 0;}
-     | ast {*result = $$ = $1; return 0;}
-     ;
+start:
+    SHEBANG ast { *result = $$ = $2; return 0; }
+  |         ast { *result = $$ = $1; return 0; }
+  ;
 
 ast: ast dexpr { $$ = spec_push($1, $2); }
    | dexpr { Spec* tt = spec_new(); $$ = spec_push(tt, $1); }
    ;
 
-dexpr: STRUCTDEF VNAME LCURLY SDef RCURLY
+/* Defining expression */
+dexpr: STRUCTDEF VNAME LBRACE SDef RBRACE
    { $$ = (DExpr){
        .type = DExpr_struct,
        .name = strdup($2),
        .exp.struct_t = $4,
      };
-     /*printf("vname:%s\n", $2);*/
    }
    ;
 
 Decl:
-    VNAME { $$ = declaration_new(Type_untyped, $1); }
-  | VNAME COLON TYPE { $$ = declaration_new($3, $1); }
-  // | VNAME EQUAL Expression { $$ = attribute_new($3, $1); }
-  // | VNAME COLON TYPE EQUAL Expression { $$ = attribute_new($3, $1); }
+    VNAME { $$ = declaration_new_open($1); }
+  | VNAME COLON TYPE { $$ = declaration_new_typed($1, $3); }
+  //| VNAME EQUAL Expr { $$ = attribute_new_untyped($1, $3); }
+  //| VNAME COLON TYPE EQUAL Expression { $$ = attribute_new($1, $3, $5); }
   ;
 
 TYPE:
-    I8      { $$ = Type_i8;     /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | I16     { $$ = Type_i16;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | I32     { $$ = Type_i32;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | I64     { $$ = Type_i64;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | U8      { $$ = Type_u8;     /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | U16     { $$ = Type_u16;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | U32     { $$ = Type_u32;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | U64     { $$ = Type_u64;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | F32     { $$ = Type_f32;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | F64     { $$ = Type_f64;    /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | BOOL    { $$ = Type_bool;   /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | USIZE   { $$ = Type_usize;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | ISIZE   { $$ = Type_isize;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | TUPLE   { $$ = Type_tuple;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | RECORD  { $$ = Type_record; /* printf("Found \"%s\"\n", Types_str[$$]); */}
-  | VNAME   { $$ = Type_alias;  /* printf("Found \"%s\"\n", Types_str[$$]); */}
+    I8      { $$ = Type_i8;     }
+  | I16     { $$ = Type_i16;    }
+  | I32     { $$ = Type_i32;    }
+  | I64     { $$ = Type_i64;    }
+  | U8      { $$ = Type_u8;     }
+  | U16     { $$ = Type_u16;    }
+  | U32     { $$ = Type_u32;    }
+  | U64     { $$ = Type_u64;    }
+  | F32     { $$ = Type_f32;    }
+  | F64     { $$ = Type_f64;    }
+  | BOOL    { $$ = Type_bool;   }
+  | USIZE   { $$ = Type_usize;  }
+  | ISIZE   { $$ = Type_isize;  }
+
+  | LPAR TYPE COMMA TYPE RPAR   { $$ = Type_tuple;  }
+  //| STRUCT        { /*tbd*/ $$ = Type_struct; }
+  | TYPE BAR TYPE { $$ = Type_union; }
+
+  | LBRACKET VNAME RBRACKET TYPE { $$ = Type_array; }
+  | LBRACKET AExpr RBRACKET TYPE { $$ = Type_array; }
+
+  | LIST TYPE        { $$ = Type_list; }
+
+  | ASTERISK  TYPE  { $$ = Type_pointer; }
+  | AMPERSAND TYPE  { $$ = Type_owner; }
+
+  | VNAME            { $$ = Type_alias;  }
+
+  | TYPE ARROW TYPE { $$ = Type_function; }
   ;
 
-
+AExpr:
+    AExpr PLUS AExpr {}
+  | NUMBER
+  ;
 
 
 
@@ -147,4 +172,5 @@ fecserror(void *yylval, char const *msg, const void *s) {
   (void)yylval;
   (void)s;
   fprintf(stderr, "Error %s\n", msg);
+  return -1;
 }
