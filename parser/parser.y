@@ -9,6 +9,7 @@
 
 %code top {
 
+#define YYERROR_VERBOSE 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -32,9 +33,11 @@
 
 %code requires {
 #include "ast.h"
+
 }
 
-%parse-param { Spec **result }
+%parse-param { Spec** result }
+
 %param { void *scanner }
 
 %code provides {
@@ -42,7 +45,7 @@
 }
 
 %code {
- int fecserror(void *foo, char const *msg, const void *s);
+ int fecserror(Spec **result, void *scanner, const char *msg);
  int fecslex(FECSSTYPE *lval , void *s);
 }
 
@@ -63,6 +66,7 @@
 %type <struct_t> SDef
 %type <declaration_t> Decl
 %type <vname> VNAME
+%type <value> NUMBER
 
 %destructor { free($$); } <vname>
 //%destructor { spec_free($$); } <specification>
@@ -78,13 +82,11 @@
 %left SLASH DOT
 %left STRUCTDEF COMPONENTDEF TYPEDEF FUNCTIONDEF SYSTEMDEF
 
-%token <value> NUMBER
 
 // Typenames
 %token I8    I16    I32    I64    U8    U16    U32    U64    F32    F64    BOOL    USIZE    ISIZE    STRING    LIST
 // Typevalues
-%token <value>
-       I8VAL I16VAL I32VAL I64VAL U8VAL U16VAL U32VAL U64VAL F32VAL F64VAL BOOLVAL USIZEVAL ISIZEVAL STRINGVAL LISTVAL
+%token <value> I8VAL I16VAL I32VAL I64VAL U8VAL U16VAL U32VAL U64VAL F32VAL F64VAL BOOLVAL USIZEVAL ISIZEVAL STRINGVAL LISTVAL
 
 %left ARROW ASTERISK AMPERSAND BAR SEMICOLON COLON EQUAL COMMA
 
@@ -114,10 +116,11 @@ dexpr: STRUCTDEF VNAME LBRACE SDef RBRACE
    ;
 
 Decl:
-    VNAME { $$ = declaration_new_open($1); }
-  | VNAME COLON TYPE { $$ = declaration_new_typed($1, $3); }
-  //| VNAME EQUAL Expr { $$ = attribute_new_untyped($1, $3); }
-  //| VNAME COLON TYPE EQUAL Expression { $$ = attribute_new($1, $3, $5); }
+    VNAME SEMICOLON { $$ = declaration_new_open($1); }
+  | VNAME COLON TYPE SEMICOLON { $$ = declaration_new_typed($1, $3); }
+  // TODO Expand this to expressions in general
+  //| VNAME EQUAL NUMBER { $$ = declaration_new_untyped($1, $3); }
+  //| VNAME COLON TYPE EQUAL Expression { $$ = declaration_new($1, $3, $5); }
   ;
 
 TYPE:
@@ -139,8 +142,7 @@ TYPE:
   //| STRUCT        { /*tbd*/ $$ = Type_struct; }
   | TYPE BAR TYPE { $$ = Type_union; }
 
-  | LBRACKET VNAME RBRACKET TYPE { $$ = Type_array; }
-  | LBRACKET AExpr RBRACKET TYPE { $$ = Type_array; }
+  //| LBRACKET AExpr RBRACKET TYPE { $$ = Type_array; }
 
   | LIST TYPE        { $$ = Type_list; }
 
@@ -152,12 +154,21 @@ TYPE:
   | TYPE ARROW TYPE { $$ = Type_function; }
   ;
 
+NUMBER:
+    I8VAL | I16VAL | I32VAL | I64VAL
+  | U8VAL | U16VAL | U32VAL | U64VAL
+  | F32VAL | F64VAL
+  | BOOLVAL
+  | USIZEVAL | ISIZEVAL
+  | STRINGVAL
+  | LISTVAL
+  ;
+
+
 AExpr:
     AExpr PLUS AExpr {}
   | NUMBER
   ;
-
-
 
 SDef:
     SDef Decl { $$ = struct_add_attrib($1, $2); }
@@ -167,10 +178,19 @@ SDef:
 %%
 
 int
-fecserror(void *yylval, char const *msg, const void *s) {
-  //fprintf(stderr, "Error %d: %s\n", yylineno, s);
-  (void)yylval;
-  (void)s;
-  fprintf(stderr, "Error %s\n", msg);
+fecserror(Spec **result, void *scanner, const char *msg) {
+  int line = fecsget_lineno(scanner);
+  int column = fecsget_column(scanner);
+
+  //if (filename == NULL) {
+    fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
+  //} else {
+  //  if (filename->filename == NULL) {
+  //    fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
+  //  } else {
+  //    fprintf(stderr, "%s:%d:%d: parse error: %s\n", filename->filename, line, column, msg);
+  //  }
+  //}
+
   return -1;
 }
