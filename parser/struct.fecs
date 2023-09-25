@@ -2,19 +2,20 @@
 
 // A simple struct with 1 untyped member
 struct v3 {
-  x : i32
-  y
-  z : i32
+  x : i32;
+  y;
+  z = 5i16;
+  w : i32 = 12i64;
 }
 
 struct aa {
-  x  : i8
-  v2 : bool
-  z  : f32
-  f  : f32 -> list i32
+  x  : i8;
+  v2 : bool;
+  z  : f32;
+  f  : f32 -> i32;
 }
 
 struct aliasedTypes {
-  vecA : v3
-  vecB : someType
+  vecA : v3;
+  vecB : someType;
 }

@@ -38,7 +38,7 @@ extern const char* Types_str[];
 
 // Primary types
 typedef enum Types_t {
-  Type_internal_error,
+  Type_internal_error = 0,
   Type_untyped,
 
   Type_i8,
@@ -75,6 +75,8 @@ typedef enum Types_t {
   Type_function, // a -> b
 
   Type_alias,    // typedef TYPE VNAME;
+
+  Type_MAX,    // size of Types_str;
 } Types_t;
 
 typedef struct Value {

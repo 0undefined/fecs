@@ -10,7 +10,8 @@
 void set_input_string(const char* in, yyscan_t scanner);
 void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 
-int parse_file(Spec** result, FILE* f) {
+int parse_file(Spec** result, char *restrict filename) {
+  FILE* f = fopen(filename, "r");
   yyscan_t scanner;
   int i = 0;
 
@@ -26,6 +27,8 @@ int parse_file(Spec** result, FILE* f) {
     exit(i);
 
   char *src = readfile_fd(f);
+  //fecslex_init_extra("ASDASD", scanner);
+
   set_input_string(src, scanner);
 
   YY_BUFFER_STATE s = fecs_scan_string ( src, scanner );

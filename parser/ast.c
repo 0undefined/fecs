@@ -43,6 +43,8 @@ const char* Types_str[] = {
   [Type_function] = "function",
 
   [Type_alias]  = "alias",
+
+  [Type_MAX] = "MAXTYPE",
 };
 
 /* For the declaration constructors, assume that `vname` already has allocated
@@ -85,6 +87,9 @@ Declaration* declaration_new_untyped(char *vname, Value v) {
 /* The way god intended declarations to be defined */
 Declaration* declaration_new(char *vname, Types_t t, Value v) {
   Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
+  if (t != v.type) {
+    printf("WARNING: type mismatch! %s != %s\n", Types_str[t], Types_str[v.type]);
+  }
   ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
   ret->value.type = t;
   return ret;

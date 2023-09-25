@@ -5,6 +5,6 @@
 
 #include "ast.h"
 
-int parse_file(Spec** result, FILE* f);
+int parse_file(Spec** result, char *restrict filename);
 
 #endif

@@ -10,8 +10,6 @@
 
 void print_help();
 
-int parse_file(Spec** result, FILE* f);
-
 int main (int argc, char* argv[]) {
 
   if (argc <= 1) {
@@ -20,13 +18,12 @@ int main (int argc, char* argv[]) {
   }
 
   // For now, just assume the file is the first argument
-  FILE* src = fopen(argv[1], "r");
 
   Spec* result = NULL;
 
   clock_t start = clock(), diff;
 
-  int e = parse_file(&result, src);
+  int e = parse_file(&result, argv[1]);
 
   //int e = fecsparse(&result, scanner);
   printf("Code = %d\n", e);

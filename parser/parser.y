@@ -61,10 +61,10 @@
 }
 
 %type <specification> start ast
-%type <type> TYPE
+%type <type> TYPE PTYPE OTYPE ATYPE
 %type <def_expr> dexpr
 %type <struct_t> SDef
-%type <declaration_t> Decl
+%type <declaration_t> Decl DeclTYPE
 %type <vname> VNAME
 %type <value> NUMBER
 
@@ -115,12 +115,17 @@ dexpr: STRUCTDEF VNAME LBRACE SDef RBRACE
    }
    ;
 
+DeclTYPE:
+    VNAME { $$ = declaration_new_open($1); }
+  | VNAME COLON TYPE { $$ = declaration_new_typed($1, $3); }
+  ;
+
+// Declarations can just be typed, or given concrete values
 Decl:
-    VNAME SEMICOLON { $$ = declaration_new_open($1); }
-  | VNAME COLON TYPE SEMICOLON { $$ = declaration_new_typed($1, $3); }
+    DeclTYPE { $$ = $1; }
   // TODO Expand this to expressions in general
-  //| VNAME EQUAL NUMBER { $$ = declaration_new_untyped($1, $3); }
-  //| VNAME COLON TYPE EQUAL Expression { $$ = declaration_new($1, $3, $5); }
+  | VNAME EQUAL NUMBER { $$ = declaration_new_untyped($1, $3); }
+  | VNAME COLON TYPE EQUAL NUMBER { $$ = declaration_new($1, $3, $5); }
   ;
 
 TYPE:
@@ -146,13 +151,18 @@ TYPE:
 
   | LIST TYPE        { $$ = Type_list; }
 
-  | ASTERISK  TYPE  { $$ = Type_pointer; }
-  | AMPERSAND TYPE  { $$ = Type_owner; }
-
   | VNAME            { $$ = Type_alias;  }
 
   | TYPE ARROW TYPE { $$ = Type_function; }
   ;
+
+ATYPE: PTYPE { $$ = $1; } | OTYPE { $$ = $1; } | TYPE { $$ = $1; };
+PTYPE: ASTERISK TYPE { $$ = Type_pointer; } ;
+OTYPE: AMPERSAND TYPE { $$ = Type_owner; } ;
+
+// Empty structs are ill-formed.
+//STRUCT_TYPEo: DeclTYPE | DeclTYPE STRUCT_TYPEo ;
+//STRUCT_TYPE: LBRACE STRUCT_TYPEo RBRACE ;
 
 NUMBER:
     I8VAL | I16VAL | I32VAL | I64VAL
@@ -160,9 +170,9 @@ NUMBER:
   | F32VAL | F64VAL
   | BOOLVAL
   | USIZEVAL | ISIZEVAL
-  | STRINGVAL
-  | LISTVAL
   ;
+  // STRINGVAL
+  // LISTVAL
 
 
 AExpr:
@@ -171,8 +181,8 @@ AExpr:
   ;
 
 SDef:
-    SDef Decl { $$ = struct_add_attrib($1, $2); }
-  | Decl { $$ = struct_add_attrib(NULL, $1); }
+    SDef Decl SEMICOLON { $$ = struct_add_attrib($1, $2); }
+  | Decl SEMICOLON { $$ = struct_add_attrib(NULL, $1); }
   ;
 
 %%
