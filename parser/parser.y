@@ -33,7 +33,6 @@
 
 %code requires {
 #include "ast.h"
-
 }
 
 %parse-param { Spec** result }
@@ -46,7 +45,7 @@
 
 %code {
  int fecserror(Spec **result, void *scanner, const char *msg);
- int fecslex(FECSSTYPE *lval , void *s);
+ int fecslex(FECSSTYPE *lval, void *s);
 }
 
 %union {
@@ -192,15 +191,7 @@ fecserror(Spec **result, void *scanner, const char *msg) {
   int line = fecsget_lineno(scanner);
   int column = fecsget_column(scanner);
 
-  //if (filename == NULL) {
-    fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
-  //} else {
-  //  if (filename->filename == NULL) {
-  //    fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
-  //  } else {
-  //    fprintf(stderr, "%s:%d:%d: parse error: %s\n", filename->filename, line, column, msg);
-  //  }
-  //}
+  fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
 
   return -1;
 }

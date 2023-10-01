@@ -86,6 +86,7 @@ Declaration* declaration_new_untyped(char *vname, Value v) {
 
 /* The way god intended declarations to be defined */
 Declaration* declaration_new(char *vname, Types_t t, Value v) {
+
   Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
   if (t != v.type) {
     printf("WARNING: type mismatch! %s != %s\n", Types_str[t], Types_str[v.type]);

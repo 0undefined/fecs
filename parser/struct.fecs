@@ -9,7 +9,7 @@ struct v3 {
 }
 
 struct aa {
-  x  : i8;
+  x  ;
   v2 : bool;
   z  : f32;
   f  : f32 -> i32;

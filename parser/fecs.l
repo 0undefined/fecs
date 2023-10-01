@@ -37,67 +37,67 @@ FECSTOKENTYPE valuetypetoken_from_value(Value v);
 
 %%
 
-"#!".*"\n"  { return SHEBANG; }
-"#include"  { return PRAGMA_IMPORT; /* #include C-library */ }
-"#load"     { return PRAGMA_LOAD; /* Load other fecs source */ }
+"#!".*"\n"  { /* puts("shebang"); */   return SHEBANG; }
+"#include"  { /* puts("include"); */   return PRAGMA_IMPORT; /* #include C-library */ }
+"#load"     { /* puts("load"); */   return PRAGMA_LOAD; /* Load other fecs source */ }
 
-"->"        { return ARROW; }
+"->"        { /* puts("ARROW"); */   return ARROW; }
 
-"("         { return LPAR; }
-")"         { return RPAR; }
-"{"         { return LBRACE; }
-"}"         { return RBRACE; }
-"["         { return LBRACKET; }
-"]"         { return RBRACKET; }
-"<"         { return LT; }
-">"         { return GT; }
+"("         { /* puts("LPAR"); */   return LPAR; }
+")"         { /* puts("RPAR"); */   return RPAR; }
+"{"         { /* puts("LBRACE"); */   return LBRACE; }
+"}"         { /* puts("RBRACE"); */   return RBRACE; }
+"["         { /* puts("LBRACKET"); */   return LBRACKET; }
+"]"         { /* puts("RBRACKET"); */   return RBRACKET; }
+"<"         { /* puts("LT"); */   return LT; }
+">"         { /* puts("GT"); */   return GT; }
 
 "//".*\n      { /* comment */ }
 
-"struct"    { return STRUCTDEF; }
-"component" { return COMPONENTDEF; }
-"type"      { return TYPEDEF; }
-"function"  { return FUNCTIONDEF; }
-"system"    { return SYSTEMDEF; }
+"struct"    { /* puts("STRUCTDEF"); */   return STRUCTDEF; }
+"component" { /* puts("COMPONENTDEF"); */   return COMPONENTDEF; }
+"type"      { /* puts("TYPEDEF"); */   return TYPEDEF; }
+"function"  { /* puts("FUNCTIONDEF"); */   return FUNCTIONDEF; }
+"system"    { /* puts("SYSTEMDEF"); */   return SYSTEMDEF; }
 
-("/\\"|"&&") { return LAND; }
-("\\/"|"||") { return LOR; }
-("!"|"¬")    { return NEG; }
+("/\\"|"&&") { /* puts("LAND"); */   return LAND; }
+("\\/"|"||") { /* puts("LOR"); */   return LOR; }
+("!"|"¬")    { /* puts("NEG"); */   return NEG; }
 
-"++"         { return CONCAT; }
+"++"         { /* puts("CONCAT"); */   return CONCAT; }
 
-":"          { return COLON; }
-";"          { return SEMICOLON; }
-"="          { return EQUAL; }
+":"          { /* puts("COLON"); */   return COLON; }
+";"          { /* puts("SEMICOLON"); */   return SEMICOLON; }
+"="          { /* puts("EQUAL"); */   return EQUAL; }
 
-"+"          { return PLUS; }
-"-"          { return MINUS; }
-"*"          { return ASTERISK; }
-"/"          { return SLASH; }
-"."          { return DOT; }
+"+"          { /* puts("PLUS"); */   return PLUS; }
+"-"          { /* puts("MINUS"); */   return MINUS; }
+"*"          { /* puts("ASTERISK"); */   return ASTERISK; }
+"/"          { /* puts("SLASH"); */   return SLASH; }
+"."          { /* puts("DOT"); */   return DOT; }
 
-"true"       { return TRUE; }
-"false"      { return FALSE; }
+"true"       { /* puts("TRUE"); */   return TRUE; }
+"false"      { /* puts("FALSE"); */   return FALSE; }
 
-"i8"         { return I8;     }
-"i16"        { return I16;    }
-"i32"        { return I32;    }
-"i64"        { return I64;    }
-"u8"         { return U8;     }
-"u16"        { return U16;    }
-"u32"        { return U32;    }
-"u64"        { return U64;    }
-"f32"        { return F32;    }
-"f64"        { return F64;    }
-"bool"       { return BOOL;   }
-"usize"      { return USIZE;  }
-"isize"      { return ISIZE;  }
-"string"     { return STRING; }
-"list"       { return LIST;   }
+"i8"         { /* puts("I8"); */   return I8;     }
+"i16"        { /* puts("I16"); */   return I16;    }
+"i32"        { /* puts("I32"); */   return I32;    }
+"i64"        { /* puts("I64"); */   return I64;    }
+"u8"         { /* puts("U8"); */   return U8;     }
+"u16"        { /* puts("U16"); */   return U16;    }
+"u32"        { /* puts("U32"); */   return U32;    }
+"u64"        { /* puts("U64"); */   return U64;    }
+"f32"        { /* puts("F32"); */   return F32;    }
+"f64"        { /* puts("F64"); */   return F64;    }
+"bool"       { /* puts("BOOL"); */   return BOOL;   }
+"usize"      { /* puts("USIZE"); */   return USIZE;  }
+"isize"      { /* puts("ISIZE"); */   return ISIZE;  }
+"string"     { /* puts("STRING"); */   return STRING; }
+"list"       { /* puts("LIST"); */   return LIST;   }
 
-[0-9]+(i8|i16|i32|i64) { yylval->value = categorize_int(yytext, yyleng); return valuetypetoken_from_value(yylval->value); }
+[0-9]+(i8|i16|i32|i64) { /* printf("TYPEVAL(%s)", yytext); */   yylval->value = categorize_int(yytext, yyleng); return valuetypetoken_from_value(yylval->value); }
 
-[a-zA-Z_][a-zA-Z0-9_']* { yylval->vname = strdup(yytext); return VNAME; }
+[a-zA-Z_][a-zA-Z0-9_']* { /* printf("VNAME(%s)", yytext); */   yylval->vname = strdup(yytext); return VNAME; }
 
 [ \r\t\n]+     { /* printf(" S "); */  /* do nothing */ }
 
@@ -116,7 +116,7 @@ end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner) {
 }
 
 /* Returns the index of `needle`, if needle is a suffix of src */
-int is_suffix(char *restrict src, const size_t srclen, char* needle) {
+int is_suffix(char *restrict src, const size_t srclen, const char* needle) {
   isize nlen = strlen(needle);
   if (srclen < nlen) return -1;
 
@@ -144,6 +144,7 @@ Value assign(Types_t t, char* val) {
   default:
     die("Assign not implemented for type");
   }
+  return (Value){.type = Type_internal_error};
 }
 
 Value categorize_int(char* valuestring, size_t len) {
@@ -161,6 +162,7 @@ Value categorize_int(char* valuestring, size_t len) {
     if (needle >= 0) {
       valuestring[needle] = '\0';
       v = assign(i, valuestring);
+      return v;
     }
   }
 
@@ -173,7 +175,7 @@ Value categorize_int(char* valuestring, size_t len) {
   }
   else {
     v.type = Type_u64;
-    v.value.i64_t.v = 43; //strtoull(valuestring, valuestring + len, 10);
+    v.value.u64_t.v = 43; //strtoull(valuestring, valuestring + len, 10);
   }
   }
 

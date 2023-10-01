@@ -13,15 +13,11 @@ void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 int parse_file(Spec** result, char *restrict filename) {
   FILE* f = fopen(filename, "r");
   yyscan_t scanner;
-  int i = 0;
+  i32 i = 0;
 
   if (!f) {
     die("Failed to read file");
   }
-
-  fseek(f, 0, SEEK_END);
-  usize len = ftell(f);
-  rewind(f);
 
   if ((i = fecslex_init(&scanner)) != 0)
     exit(i);

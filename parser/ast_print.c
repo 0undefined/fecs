@@ -31,8 +31,30 @@ void print_vname(VName n) {
   printf("%s_%zd", n.name, n.tag);
 }
 
+void print_type(Types_t t) {
+  printf("%s", Types_str[t]);
+}
+
+void print_value(Value v) {
+  switch (v.type) {
+    case Type_i8:  printf("%d",  v.value.i8_t.v); break;
+    case Type_i16: printf("%d",  v.value.i16_t.v); break;
+    case Type_i32: printf("%d",  v.value.i32_t.v); break;
+    case Type_i64: printf("%ld", v.value.i64_t.v); break;
+    case Type_u8:  printf("%d",  v.value.u8_t.v); break;
+    case Type_u16: printf("%d",  v.value.u16_t.v); break;
+    case Type_u32: printf("%d",  v.value.u32_t.v); break;
+    case Type_u64: printf("%lu", v.value.u64_t.v); break;
+    default:
+      printf("?");
+  }
+}
+
 void print_attrib(Declaration* a) {
-  Types_t t = a->value.type;
   print_vname(a->vname);
-  printf(" : %s\n", Types_str[t]);
+  printf(" : ");
+  print_type(a->value.type);
+  printf(" = ");
+  print_value(a->value);
+  printf("\n");
 }

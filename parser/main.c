@@ -25,7 +25,6 @@ int main (int argc, char* argv[]) {
 
   int e = parse_file(&result, argv[1]);
 
-  //int e = fecsparse(&result, scanner);
   printf("Code = %d\n", e);
   if (e == 0) {
     printf("\n---\n");
