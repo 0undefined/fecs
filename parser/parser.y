@@ -1,11 +1,15 @@
 /* Disable public variables cluttering everything up */
-%define api.pure true
+%define api.pure full
 
 /* Rename prefix to avoid clashes */
 %define api.prefix {fecs}
 
+%define api.location.type {location_t}
+
 /* More usefull error messages*/
 %define parse.error verbose
+
+%locations
 
 %code top {
 
@@ -16,6 +20,7 @@
 #include <wchar.h>
 #include <string.h>
 #include <ctype.h>
+
 
 //#include "ast.h"
 //
@@ -33,6 +38,16 @@
 
 %code requires {
 #include "ast.h"
+
+typedef struct location_t
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+  const char *sourcefile;
+} location_t;
+typedef struct location_t YYLTYPE;
 }
 
 %parse-param { Spec** result }
@@ -44,8 +59,8 @@
 }
 
 %code {
- int fecserror(Spec **result, void *scanner, const char *msg);
- int fecslex(FECSSTYPE *lval, void *s);
+ int fecserror(location_t *loc, Spec **result, void *scanner, const char *msg);
+ int fecslex(FECSSTYPE *lval, location_t *loc, void *s);
 }
 
 %union {
@@ -187,9 +202,12 @@ SDef:
 %%
 
 int
-fecserror(Spec **result, void *scanner, const char *msg) {
-  int line = fecsget_lineno(scanner);
+fecserror(location_t *loc, Spec **result, void *scanner, const char *msg) {
+  int line = 1 + fecsget_lineno(scanner);
   int column = fecsget_column(scanner);
+
+  fprintf(stderr, "\nlocation: %d:%d - %d:%d\n", loc->first_line, loc->first_column, loc->last_line, loc->last_column);
+  fprintf(stderr, "%s\n", loc->sourcefile);
 
   fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
 

@@ -85,7 +85,12 @@ Declaration* declaration_new_untyped(char *vname, Value v) {
 }
 
 /* The way god intended declarations to be defined */
+//Declaration* declaration_new(void *scanner, char *vname, Types_t t, Value v) {
 Declaration* declaration_new(char *vname, Types_t t, Value v) {
+
+  //const int line = fecsget_lineno(scanner);
+  //const int column = fecsget_column(scanner);
+
 
   Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
   if (t != v.type) {

@@ -6,11 +6,12 @@
 %option prefix="fecs"
 
 /* Generate thread safe code */
-%option reentrant bison-bridge
+%option reentrant bison-bridge bison-locations
 
-%option   8bit reentrant bison-bridge
+%option   8bit
 %option   warn nodefault
 %option   yylineno
+%option   noinput nounput
 %option   outfile="lex.fecs.c" header-file="lex.fecs.h"
 
 %{
@@ -27,11 +28,22 @@
 // Maybe unnecessary?
 #define YYSTYPE FECSSTYPE
 
-int fecserror(const char *msg);
+//int fecserror(const char *msg);
+int fecserror(Spec **result, void *scanner, const char *msg);
 void set_input_string(const char* in, yyscan_t scanner);
 void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 Value categorize_int(char* valuestring, size_t len);
 FECSTOKENTYPE valuetypetoken_from_value(Value v);
+
+#define YY_USER_ACTION                                               \
+    yylloc->first_line = yylloc->last_line;                          \
+    yylloc->first_column = yylloc->last_column;                      \
+    if (yylloc->last_line == yylineno)                               \
+      yylloc->last_column += yyleng;                                 \
+    else {                                                           \
+      yylloc->last_line = yylineno;                                  \
+      yylloc->last_column = yytext + yyleng - strrchr(yytext, '\n'); \
+    }
 
 %}
 
