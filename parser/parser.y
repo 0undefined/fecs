@@ -142,36 +142,37 @@ Decl:
   ;
 
 TYPE:
-    I8      { $$ = Type_i8;     }
-  | I16     { $$ = Type_i16;    }
-  | I32     { $$ = Type_i32;    }
-  | I64     { $$ = Type_i64;    }
-  | U8      { $$ = Type_u8;     }
-  | U16     { $$ = Type_u16;    }
-  | U32     { $$ = Type_u32;    }
-  | U64     { $$ = Type_u64;    }
-  | F32     { $$ = Type_f32;    }
-  | F64     { $$ = Type_f64;    }
-  | BOOL    { $$ = Type_bool;   }
-  | USIZE   { $$ = Type_usize;  }
-  | ISIZE   { $$ = Type_isize;  }
+    I8      { $$ = ZTYPE(Type_i8);     }
+  | I16     { $$ = ZTYPE(Type_i16);    }
+  | I32     { $$ = ZTYPE(Type_i32);    }
+  | I64     { $$ = ZTYPE(Type_i64);    }
+  | U8      { $$ = ZTYPE(Type_u8);     }
+  | U16     { $$ = ZTYPE(Type_u16);    }
+  | U32     { $$ = ZTYPE(Type_u32);    }
+  | U64     { $$ = ZTYPE(Type_u64);    }
+  | F32     { $$ = ZTYPE(Type_f32);    }
+  | F64     { $$ = ZTYPE(Type_f64);    }
+  | BOOL    { $$ = ZTYPE(Type_bool);   }
+  | USIZE   { $$ = ZTYPE(Type_usize);  }
+  | ISIZE   { $$ = ZTYPE(Type_isize);  }
 
-  | LPAR TYPE COMMA TYPE RPAR   { $$ = Type_tuple;  }
+  | LPAR TYPE COMMA TYPE RPAR   { $$ = BTYPE(Type_tuple, &$2, &$4);  }
   //| STRUCT        { /*tbd*/ $$ = Type_struct; }
-  | TYPE BAR TYPE { $$ = Type_union; }
+  | TYPE BAR TYPE { $$ = BTYPE(Type_union, &$1, &$3); }
 
   //| LBRACKET AExpr RBRACKET TYPE { $$ = Type_array; }
+  //| LBRACKET VNAME RBRACKET TYPE { $$ = Type_array; }
 
-  | LIST TYPE        { $$ = Type_list; }
+  | LIST TYPE        { $$ = UTYPE(Type_list, &$2); }
 
-  | VNAME            { $$ = Type_alias;  }
+  | TYPE ARROW TYPE { $$ = BTYPE(Type_function, &$1, &$3); }
 
-  | TYPE ARROW TYPE { $$ = Type_function; }
+  | VNAME            { $$ = NTYPE(Type_alias, strdup($1));  }
   ;
 
 ATYPE: PTYPE { $$ = $1; } | OTYPE { $$ = $1; } | TYPE { $$ = $1; };
-PTYPE: ASTERISK TYPE { $$ = Type_pointer; } ;
-OTYPE: AMPERSAND TYPE { $$ = Type_owner; } ;
+PTYPE: ASTERISK TYPE { $$ = UTYPE(Type_pointer, &$2); } ;
+OTYPE: AMPERSAND TYPE { $$ = UTYPE(Type_owner, &$2); } ;
 
 // Empty structs are ill-formed.
 //STRUCT_TYPEo: DeclTYPE | DeclTYPE STRUCT_TYPEo ;

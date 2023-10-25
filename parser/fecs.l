@@ -28,6 +28,8 @@
 // Maybe unnecessary?
 #define YYSTYPE FECSSTYPE
 
+typedef int FECSTOKENTYPE;
+
 //int fecserror(const char *msg);
 int fecserror(Spec **result, void *scanner, const char *msg);
 void set_input_string(const char* in, yyscan_t scanner);
@@ -109,9 +111,9 @@ FECSTOKENTYPE valuetypetoken_from_value(Value v);
 
 [0-9]+(i8|i16|i32|i64) { /* printf("TYPEVAL(%s)", yytext); */   yylval->value = categorize_int(yytext, yyleng); return valuetypetoken_from_value(yylval->value); }
 
-[a-zA-Z_][a-zA-Z0-9_']* { /* printf("VNAME(%s)", yytext); */   yylval->vname = strdup(yytext); return VNAME; }
-
 [ \r\t\n]+     { /* printf(" S "); */  /* do nothing */ }
+
+[a-zA-Z_][a-zA-Z0-9_']* { /* printf("VNAME(%s)", yytext); */   yylval->vname = strdup(yytext); return VNAME; }
 
 %%
 
@@ -143,7 +145,7 @@ int is_suffix(char *restrict src, const size_t srclen, const char* needle) {
 }
 
 Value assign(Types_t t, char* val) {
-  switch (t) {
+  switch (t.type) {
   case Type_i8:   return (Value){.type = t, .value.i8_t.v  = atoi(val)};
   case Type_i16:  return (Value){.type = t, .value.i16_t.v = atoi(val)};
   case Type_i32:  return (Value){.type = t, .value.i32_t.v = atoi(val)};
@@ -160,7 +162,7 @@ Value assign(Types_t t, char* val) {
 }
 
 Value categorize_int(char* valuestring, size_t len) {
-  Value v = (Value){.type = Type_untyped};
+  Value v = (Value){.type = ZTYPE(Type_untyped)};
   bool signed_type = valuestring[0] == '-';
 
   /* Check if `valuestring` has a suffix of a type. */
@@ -173,20 +175,20 @@ Value categorize_int(char* valuestring, size_t len) {
 
     if (needle >= 0) {
       valuestring[needle] = '\0';
-      v = assign(i, valuestring);
+      v = assign(ZTYPE(i), valuestring);
       return v;
     }
   }
 
   /* For now, just accept the type, if given. */
   /* TODO: Verify the range of the value. */
-  if (v.type == Type_untyped) {
+  if (v.type.type == Type_untyped) {
   if (signed_type) {
-    v.type = Type_i64;
+    v.type = ZTYPE(Type_i64);
     v.value.i64_t.v = 42; //atoll(valuestring);
   }
   else {
-    v.type = Type_u64;
+    v.type = ZTYPE(Type_u64);
     v.value.u64_t.v = 43; //strtoull(valuestring, valuestring + len, 10);
   }
   }
@@ -195,7 +197,7 @@ Value categorize_int(char* valuestring, size_t len) {
 }
 
 FECSTOKENTYPE valuetypetoken_from_value(Value v) {
-  switch (v.type) {
+  switch (v.type.type) {
     case Type_i8:        return     I8VAL;
     case Type_i16:       return     I16VAL;
     case Type_i32:       return     I32VAL;

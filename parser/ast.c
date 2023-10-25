@@ -2,8 +2,8 @@
 
 static isize GLOBAL_tag_counter = 0;
 
-LinkedList_Implementation(DExpr);
-LinkedList_Implementation(Declaration);
+LinkedList_Implementation(DExpr)
+LinkedList_Implementation(Declaration)
 
 const char* Types_str[] = {
   [Type_internal_error] = "internal_error",
@@ -47,6 +47,77 @@ const char* Types_str[] = {
   [Type_MAX] = "MAXTYPE",
 };
 
+// Supertyped
+Types_t ZTYPE(RawTypes_t t) {
+  return (Types_t){
+    .type = t,
+      .subtype_1 = NULL,
+      .subtype_2 = NULL,
+      .type_name = NULL
+  };
+}
+// unary typed
+Types_t UTYPE(RawTypes_t t, Types_t *a) {
+  return (Types_t){
+    .type = t,
+      .subtype_1 = type_dup(a),
+      .subtype_2 = NULL,
+      .type_name = NULL
+  };
+}
+// binary typed
+Types_t BTYPE(RawTypes_t t, Types_t *a, Types_t *b) {
+  return (Types_t){
+    .type = t,
+      .subtype_1 = type_dup(a),
+      .subtype_2 = type_dup(b),
+      .type_name = NULL
+  };
+}
+// named type (aka, alias & array)
+Types_t NTYPE(RawTypes_t t, char* name) {
+  return (Types_t){
+    .type = t,
+      .subtype_1 = NULL,
+      .subtype_2 = NULL,
+      .type_name = name
+  };
+}
+
+// Types needs to be duplicated s.t. they're not cleaned up from the parser.
+// t is assumed that it is _not_ allocated here, and is safe to discard the
+// reference, in regard to memory leakage.
+Types_t *type_dup(Types_t *t) {
+
+  Types_t *res = NULL;
+
+  Types_t *t1 = NULL;
+  Types_t *t2 = NULL;
+
+  if (t == NULL) return t;
+
+  if (t->subtype_2 != NULL) {
+    t2 = type_dup(t->subtype_2);
+    t1 = type_dup(t->subtype_1);
+  }
+  else if (t->subtype_1 != NULL) {
+    t1 = type_dup(t->subtype_1);
+  }
+
+  res = malloc(sizeof(Types_t));
+  res->type = t->type;
+  res->subtype_1 = t1;
+  res->subtype_2 = t2;
+
+  if (t->type_name != NULL) {
+    res->type_name = strdup(t->type_name); // this might get nasty, since we also
+                                           // strdup when aliasing already
+    // free t->type_name ??
+  }
+
+  return res;
+}
+
 /* For the declaration constructors, assume that `vname` already has allocated
  * dedicated memory */
 
@@ -56,7 +127,7 @@ Declaration* declaration_new_open(char *vname) {
   ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
   ret->has_type = None;
   ret->has_default_value = None;
-  ret->value.type = Type_untyped;
+  ret->value.type = ZTYPE(Type_untyped);
   return ret;
 }
 
@@ -93,8 +164,8 @@ Declaration* declaration_new(char *vname, Types_t t, Value v) {
 
 
   Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
-  if (t != v.type) {
-    printf("WARNING: type mismatch! %s != %s\n", Types_str[t], Types_str[v.type]);
+  if (t.type != v.type.type) {
+    printf("WARNING: type mismatch! %s != %s\n", Types_str[t.type], Types_str[v.type.type]);
   }
   ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
   ret->value.type = t;

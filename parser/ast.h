@@ -37,7 +37,7 @@ typedef enum DExpr_t {
 extern const char* Types_str[];
 
 // Primary types
-typedef enum Types_t {
+typedef enum RawTypes_t {
   Type_internal_error = 0,
   Type_untyped,
 
@@ -62,9 +62,9 @@ typedef enum Types_t {
   Type_string,
 
   /* Combinatory types, and their syntax. */
-  Type_tuple,    // ( a, b, c )
+  Type_tuple,    // ( a,  b,  c ) == ( a, ( b,  c ) )   // shouldn't tuples just be key-less structs?
   Type_struct,   // { k0; k1 : a; k2 = v0; k3 : b = v1; }
-  Type_union,    //  a | b | c
+  Type_union,    //   a | b | c   ==  a | ( b | c )
   Type_array,    // [n]a
   Type_list,     // list a
 
@@ -77,7 +77,27 @@ typedef enum Types_t {
   Type_alias,    // typedef TYPE VNAME;
 
   Type_MAX,    // size of Types_str;
+} RawTypes_t;
+
+struct Types_t; // used in unary types (list, array, pointers & owners)
+
+typedef struct Types_t {
+  RawTypes_t type;
+  struct Types_t *subtype_1; // used in unary types (list, array, pointers & owners)
+  struct Types_t *subtype_2; // used in binary types (functions, unions, structs, tuples)
+  char *type_name; // only used for aliasing
 } Types_t;
+
+Types_t *type_dup(Types_t *t);
+
+// Supertyped
+Types_t ZTYPE(RawTypes_t t);
+// unary typed
+Types_t UTYPE(RawTypes_t t, Types_t *a);
+// binary typed
+Types_t BTYPE(RawTypes_t t, Types_t *a, Types_t *b);
+// named type (aka, alias & array)
+Types_t NTYPE(RawTypes_t t, char* name);
 
 typedef struct Value {
   Types_t type;
@@ -98,7 +118,7 @@ typedef struct Value {
     struct { isize v;}  isize_t;
     struct { usize v;}  usize_t;
 
-    struct { char *typestr; Types_t v; } alias_t;
+    struct { Types_t v; } alias_t;
   } value;
 } Value;
 

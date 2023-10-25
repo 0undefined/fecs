@@ -32,11 +32,57 @@ void print_vname(VName n) {
 }
 
 void print_type(Types_t t) {
-  printf("%s", Types_str[t]);
+  printf("(");
+  printf("%s", Types_str[t.type]);
+  switch (t.type) {
+    case Type_tuple:
+      printf(" (");
+      print_type(*t.subtype_1);
+      printf(", ");
+      print_type(*t.subtype_2);
+      printf(")");
+      break;
+    case Type_struct:
+      break;
+    case Type_union:
+      printf(" ");
+      print_type(*t.subtype_1);
+      printf(" | ");
+      print_type(*t.subtype_2);
+      break;
+    case Type_array:
+      break;
+    case Type_list:
+      printf(" list ");
+      print_type(*t.subtype_1);
+      break;
+
+      /* Pointer types */
+    case Type_pointer:
+      printf(" *");
+      print_type(*t.subtype_1);
+    case Type_owner:
+      printf(" &");
+      print_type(*t.subtype_1);
+      break;
+
+    case Type_function:
+      printf(" ");
+      print_type(*t.subtype_1);
+      printf(" -> ");
+      print_type(*t.subtype_2);
+      break;
+
+    case Type_alias:
+      printf(" (%s)", t.type_name);
+      break;
+    default:break;
+  }
+  printf(")");
 }
 
 void print_value(Value v) {
-  switch (v.type) {
+  switch (v.type.type) {
     case Type_i8:  printf("%d",  v.value.i8_t.v); break;
     case Type_i16: printf("%d",  v.value.i16_t.v); break;
     case Type_i32: printf("%d",  v.value.i32_t.v); break;
