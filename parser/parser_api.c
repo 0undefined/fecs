@@ -11,7 +11,9 @@ void set_input_string(const char* in, yyscan_t scanner);
 void end_lexical_scan(YY_BUFFER_STATE b, yyscan_t scanner);
 
 int parse_file(Spec** result, char *restrict filename) {
+  // Duplicate filename in case it is wiped
   FILE* f = fopen(filename, "r");
+  char *sourcefile = strdup(filename);
   yyscan_t scanner;
   i32 i = 0;
 
@@ -23,16 +25,15 @@ int parse_file(Spec** result, char *restrict filename) {
     exit(i);
 
   char *src = readfile_fd(f);
-  //fecslex_init_extra("ASDASD", scanner);
 
   set_input_string(src, scanner);
 
   YY_BUFFER_STATE s = fecs_scan_string ( src, scanner );
 
-  i = fecsparse(filename, result, scanner);
+  i = fecsparse(sourcefile, result, scanner);
 
   end_lexical_scan(s, scanner);
-  //fecs_delete_buffer(s, scanner);
   fecslex_destroy(scanner);
+  free(sourcefile);
   return i;
 }

@@ -21,15 +21,6 @@
 #include <string.h>
 #include <ctype.h>
 
-
-//#include "ast.h"
-//
-//void yyerror(char* e);
-//int yylex();
-//int err = 0;
-
-//Spec *specification = NULL;
-
 #ifndef YYNOMEM
 #define YYNOMEM goto yyexhaustedlab
 #endif
@@ -39,6 +30,7 @@
 %code requires {
 #include "ast.h"
 
+/* Define custom location type */
 typedef struct location_t
 {
   int first_line;
@@ -48,6 +40,7 @@ typedef struct location_t
   char *sourcefile;
 } location_t;
 typedef struct location_t YYLTYPE;
+
 }
 
 %parse-param { char *file_name }
@@ -55,7 +48,7 @@ typedef struct location_t YYLTYPE;
 
 %initial-action
 {
-  @$.sourcefile = strdup(file_name);
+  @$.sourcefile = file_name;
 };
 
 %param { void *scanner }
@@ -207,17 +200,28 @@ SDef:
 
 %%
 
+char *fecsget_text ( void* yyscanner );
+
+void
+print_location(FILE *__restrict fd, location_t *loc) {
+  int line_start = 1 + loc->first_line;
+  int line_end = 1 + loc->last_line;
+  int col_start = loc->first_column;
+  int col_end = loc->last_column;
+
+  fprintf(fd, "%s:%d:%d-%d:%d: ",
+    loc->sourcefile != NULL ? loc->sourcefile : "(unknown source)",
+    line_start, col_start,
+    line_end, col_end);
+}
+
 int
 fecserror(location_t *loc, char* file_name, Spec **result, void *scanner, const char *msg) {
-  int line = 1 + fecsget_lineno(scanner);
-  int column = fecsget_column(scanner);
+  FILE* fd = stderr;
 
-  fprintf(stderr, "%s:%d:%d-%d:%d\n",
-    loc->sourcefile != NULL ? loc->sourcefile : "(unknown source)",
-    1+loc->first_line, loc->first_column,
-    1+loc->last_line, loc->last_column);
+  print_location(fd, loc);
 
-  fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
+  fprintf(fd, "%s, \"%s\"\n", msg, fecsget_text(scanner));
 
   return -1;
 }

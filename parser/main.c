@@ -25,13 +25,14 @@ int main (int argc, char* argv[]) {
 
   int e = parse_file(&result, argv[1]);
 
-  printf("Code = %d\n", e);
-  if (e == 0) {
-    printf("\n---\n");
-    print_ast(result);
-    printf("---\n");
-    /* TODO free */
+  if (e != 0) {
+    return e;
   }
+
+  printf("\n---\n");
+  print_ast(result);
+  printf("---\n");
+  /* TODO free */
 
   diff = clock() - start;
   int diff_ms = diff * 1000 / CLOCKS_PER_SEC;
