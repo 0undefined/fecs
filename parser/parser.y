@@ -45,12 +45,18 @@ typedef struct location_t
   int first_column;
   int last_line;
   int last_column;
-  const char *sourcefile;
+  char *sourcefile;
 } location_t;
 typedef struct location_t YYLTYPE;
 }
 
+%parse-param { char *file_name }
 %parse-param { Spec** result }
+
+%initial-action
+{
+  @$.sourcefile = strdup(file_name);
+};
 
 %param { void *scanner }
 
@@ -59,7 +65,7 @@ typedef struct location_t YYLTYPE;
 }
 
 %code {
- int fecserror(location_t *loc, Spec **result, void *scanner, const char *msg);
+ int fecserror(location_t *loc, char* file_name, Spec **result, void *scanner, const char *msg);
  int fecslex(FECSSTYPE *lval, location_t *loc, void *s);
 }
 
@@ -202,12 +208,14 @@ SDef:
 %%
 
 int
-fecserror(location_t *loc, Spec **result, void *scanner, const char *msg) {
+fecserror(location_t *loc, char* file_name, Spec **result, void *scanner, const char *msg) {
   int line = 1 + fecsget_lineno(scanner);
   int column = fecsget_column(scanner);
 
-  fprintf(stderr, "\nlocation: %d:%d - %d:%d\n", loc->first_line, loc->first_column, loc->last_line, loc->last_column);
-  fprintf(stderr, "%s\n", loc->sourcefile);
+  fprintf(stderr, "%s:%d:%d-%d:%d\n",
+    loc->sourcefile != NULL ? loc->sourcefile : "(unknown source)",
+    1+loc->first_line, loc->first_column,
+    1+loc->last_line, loc->last_column);
 
   fprintf(stderr, "(input):%d:%d: parse error: %s\n", line, column, msg);
 

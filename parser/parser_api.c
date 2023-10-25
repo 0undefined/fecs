@@ -29,7 +29,7 @@ int parse_file(Spec** result, char *restrict filename) {
 
   YY_BUFFER_STATE s = fecs_scan_string ( src, scanner );
 
-  i = fecsparse(result, scanner);
+  i = fecsparse(filename, result, scanner);
 
   end_lexical_scan(s, scanner);
   //fecs_delete_buffer(s, scanner);
