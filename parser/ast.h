@@ -10,6 +10,17 @@
 #include "types.h"
 #include "algo.h"
 
+/* Define custom location type */
+typedef struct location_t
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+  char *sourcefile;
+} location_t;
+typedef struct location_t YYLTYPE;
+
 // Top level definitions
 typedef enum DExpr_t {
   /* Structs are program-level type definitions used to group related values
@@ -63,6 +74,9 @@ typedef enum RawTypes_t {
 
   /* Combinatory types, and their syntax. */
   Type_tuple,    // ( a,  b,  c ) == ( a, ( b,  c ) )   // shouldn't tuples just be key-less structs?
+  // A struct should in reality be an aliased type, or a typedef.
+  // of sorts.
+  // typedef vname type
   Type_struct,   // { k0; k1 : a; k2 = v0; k3 : b = v1; }
   Type_union,    //   a | b | c   ==  a | ( b | c )
   Type_array,    // [n]a
@@ -173,7 +187,7 @@ typedef struct Spec {
 Declaration* declaration_new_open(char *vname);
 Declaration* declaration_new_typed(char *vname, Types_t t);
 Declaration* declaration_new_untyped(char *vname, Value v);
-Declaration* declaration_new(char *vname, Types_t t, Value v);
+Declaration* declaration_new(location_t *loc, char *vname, Types_t t, Value v);
 
 Struct_t* struct_new();
 Struct_t* struct_add_attrib(Struct_t* s, Declaration *a);

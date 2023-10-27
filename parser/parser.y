@@ -29,18 +29,6 @@
 
 %code requires {
 #include "ast.h"
-
-/* Define custom location type */
-typedef struct location_t
-{
-  int first_line;
-  int first_column;
-  int last_line;
-  int last_column;
-  char *sourcefile;
-} location_t;
-typedef struct location_t YYLTYPE;
-
 }
 
 %parse-param { char *file_name }
@@ -138,7 +126,7 @@ Decl:
     DeclTYPE { $$ = $1; }
   // TODO Expand this to expressions in general
   | VNAME EQUAL NUMBER { $$ = declaration_new_untyped($1, $3); }
-  | VNAME COLON TYPE EQUAL NUMBER { $$ = declaration_new($1, $3, $5); }
+  | VNAME COLON TYPE EQUAL NUMBER { $$ = declaration_new(&@$, $1, $3, $5); }
   ;
 
 TYPE:

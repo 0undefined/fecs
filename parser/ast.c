@@ -112,7 +112,7 @@ Types_t *type_dup(Types_t *t) {
   if (t->type_name != NULL) {
     res->type_name = strdup(t->type_name); // this might get nasty, since we also
                                            // strdup when aliasing already
-    // free t->type_name ??
+    free(t->type_name);
   }
 
   return res;
@@ -157,15 +157,13 @@ Declaration* declaration_new_untyped(char *vname, Value v) {
 
 /* The way god intended declarations to be defined */
 //Declaration* declaration_new(void *scanner, char *vname, Types_t t, Value v) {
-Declaration* declaration_new(char *vname, Types_t t, Value v) {
-
-  //const int line = fecsget_lineno(scanner);
-  //const int column = fecsget_column(scanner);
-
+Declaration* declaration_new(location_t *loc, char *vname, Types_t t, Value v) {
 
   Declaration* ret = (Declaration*)calloc(1, sizeof(Declaration));
   if (t.type != v.type.type) {
-    printf("WARNING: type mismatch! %s != %s\n", Types_str[t.type], Types_str[v.type.type]);
+    fprintf(stderr, "%s:%d:%d: WARNING: type mismatch! %s != %s\n",
+        loc->sourcefile, 1 + loc->first_line, loc->first_column,
+        Types_str[t.type], Types_str[v.type.type]);
   }
   ret->vname = (VName){.tag = GLOBAL_tag_counter++, .name=vname};
   ret->value.type = t;
