@@ -7,8 +7,8 @@ default: main
 lex.fecs.c: fecs.l fecs.tab.h
 	$(LEX) -P fecs fecs.l
 
-fecs.tab.c fecs.tab.h: parser.y
-	$(YACC) -d -b fecs parser.y
+fecs.tab.c fecs.tab.h: fecs.y
+	$(YACC) -d -b fecs fecs.y
 
 lex.fecs.o: lex.fecs.c
 	gcc $(CFLAGS) -g -Og -c lex.fecs.c
