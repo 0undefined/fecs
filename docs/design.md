@@ -52,6 +52,8 @@ struct MyStruct {
 }
 ```
 
+A struct is in reality an aliased type, to the struct-type itself.
+
 The variable declarations in type declarations, have a unique feature compared
 to regular variable declarations when it comes to declaring pointers: There are
 two options when declaring a member of a pointer type:
