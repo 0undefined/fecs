@@ -66,7 +66,7 @@
 %type <def_expr> dexpr
 %type <struct_t> SDef
 %type <declaration_t> Decl DeclTYPE
-%type <vname> VNAME
+%type <vname> VNAME TYPEPARAMETER
 %type <value> NUMBER
 
 %destructor { free($$); } <vname>
@@ -74,7 +74,7 @@
 
 
 
-%token VNAME
+%token VNAME TYPEPARAMETER
 
 %token LAND LOR NEG
 
@@ -98,35 +98,43 @@
 
 %%
 start:
-    SHEBANG ast { *result = $$ = $2; return 0; }
-  |         ast { *result = $$ = $1; return 0; }
+    SHEBANG ast { *result = $$ = $ast; return 0; }
+  |         ast { *result = $$ = $ast; return 0; }
   ;
 
-ast: ast dexpr { $$ = spec_push($1, $2); }
-   | dexpr { Spec* tt = spec_new(); $$ = spec_push(tt, $1); }
-   ;
+ast:
+    ast dexpr { $$ = spec_push($1, $dexpr); }
+  | dexpr { Spec* tt = spec_new(); $$ = spec_push(tt, $dexpr); }
+  ;
+
+parameterz:
+    /* empty */
+  | parameterz TYPEPARAMETER
+  ;
+
 
 /* Defining expression */
-dexpr: STRUCTDEF VNAME LBRACE SDef RBRACE
-   { $$ = (DExpr){
-       .type = DExpr_struct,
-       .name = strdup($2),
-       .exp.struct_t = $4,
-     };
-   }
-   ;
+dexpr:
+    STRUCTDEF VNAME parameterz LBRACE SDef RBRACE
+       { $$ = (DExpr){
+           .type = DExpr_struct,
+           .name = strdup($VNAME),
+           .exp.struct_t = $SDef,
+         };
+       }
+  ;
 
 DeclTYPE:
-    VNAME { $$ = declaration_new_open($1); }
-  | VNAME COLON TYPE { $$ = declaration_new_typed($1, $3); }
+    VNAME { $$ = declaration_new_open($VNAME); }
+  | VNAME COLON TYPE { $$ = declaration_new_typed($VNAME, $TYPE); }
   ;
 
 // Declarations can just be typed, or given concrete values
 Decl:
-    DeclTYPE { $$ = $1; }
+    DeclTYPE { $$ = $DeclTYPE; }
   // TODO Expand this to expressions in general
-  | VNAME EQUAL NUMBER { $$ = declaration_new_untyped($1, $3); }
-  | VNAME COLON TYPE EQUAL NUMBER { $$ = declaration_new(&@$, $1, $3, $5); }
+  | VNAME EQUAL NUMBER { $$ = declaration_new_untyped($VNAME, $NUMBER); }
+  | VNAME COLON TYPE EQUAL NUMBER { $$ = declaration_new(&@$, $VNAME, $TYPE, $NUMBER); }
   ;
 
 TYPE:
@@ -155,12 +163,12 @@ TYPE:
 
   | TYPE ARROW TYPE { $$ = BTYPE(Type_function, &$1, &$3); }
 
-  | VNAME            { $$ = NTYPE(Type_alias, strdup($1));  }
+  | VNAME            { $$ = NTYPE(Type_alias, strdup($VNAME));  }
   ;
 
 ATYPE: PTYPE { $$ = $1; } | OTYPE { $$ = $1; } | TYPE { $$ = $1; };
-PTYPE: ASTERISK TYPE { $$ = UTYPE(Type_pointer, &$2); } ;
-OTYPE: AMPERSAND TYPE { $$ = UTYPE(Type_owner, &$2); } ;
+PTYPE: ASTERISK TYPE { $$ = UTYPE(Type_pointer, &$TYPE); } ;
+OTYPE: AMPERSAND TYPE { $$ = UTYPE(Type_owner, &$TYPE); } ;
 
 // Empty structs are ill-formed.
 //STRUCT_TYPEo: DeclTYPE | DeclTYPE STRUCT_TYPEo ;

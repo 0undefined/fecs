@@ -113,6 +113,8 @@ FECSTOKENTYPE valuetypetoken_from_value(Value v);
 
 [ \r\t\n]+     { /* printf(" S "); */  /* do nothing */ }
 
+'[a-zA-Z_][a-zA-Z0-9_']* { /* printf("VNAME(%s)", yytext); */   yylval->vname = strdup(yytext); return TYPEPARAMETER; }
+
 [a-zA-Z_][a-zA-Z0-9_']* { /* printf("VNAME(%s)", yytext); */   yylval->vname = strdup(yytext); return VNAME; }
 
 %%
