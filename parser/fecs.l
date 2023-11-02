@@ -66,7 +66,8 @@ FECSTOKENTYPE valuetypetoken_from_value(Value v);
 "<"         { /* puts("LT"); */   return LT; }
 ">"         { /* puts("GT"); */   return GT; }
 
-"--".*\n      { /* comment */ }
+^"-- ".*\n  { /* comment */ }
+" -- ".*\n  { /* comment */ }
 
 "struct"    { /* puts("STRUCTDEF"); */   return STRUCTDEF; }
 "component" { /* puts("COMPONENTDEF"); */   return COMPONENTDEF; }
