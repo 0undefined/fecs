@@ -7,7 +7,23 @@ be directly next to any leading, or trailing, non-whitespace characters.
 
 ## Types & Declarations
 
-A declaration has the following syntax, in backus naur form:
+When discussing types, we sometimes need types that "contain" other types, we
+refer to the contained types as "subtypes". However the Subtypes used when
+describing types are NOT the same as the kind of subtypes (and subtyping) used
+in the type system!
+
+Types can be expressed as following, in backus naur form. We have three main
+types, which can be used in different contexts:
+* Pointer Type (`PType`): This is a simple reference to a value of the given
+  subtype. These can be used anywhere.
+* Owner Type (`OType`): This special type is also a pointer, its use is however
+  limited to subtypes of container types, such as structs. The meaning of the
+  owner type has the significance that the value pointed to should be freed from
+  memory when the containing value is freed. This does however not mean that the
+  contained value should be initialized when the containing value is allocated.
+* Parameter (`ParameterType`): These are used to parameterize types. These can
+  be used in (almost) all types of top-level declarations, such as functions and
+  structs.
 
 ```EBNF
 Declaration ::=
@@ -16,7 +32,10 @@ Declaration ::=
   | VName "=" Expr ";"
   | VName ":" PType "=" Expr ";" ;
 
-PType ::= "*" Type |  Type ;
+AnyType ::= PType | OType | Type ;
+PType ::= "*" Type ;
+OType ::= "&" Type ;
+ParameterType ::= "'" VName ;
 
 Type ::=
     "bool"
@@ -82,5 +101,10 @@ EDeclaration ::=
 
 EType ::= "&" Type | PType ;
 ```
+
+## Arithmetic expressions
+
+a
+
 
 ## Entity Component Features
